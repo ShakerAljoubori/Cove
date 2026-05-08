@@ -16,12 +16,13 @@ import Login from "./Login";
 import Register from "./Register";
 import Favorites from "./Favorites";
 import SettingsPage from "./SettingsPage";
+import SearchResultsPage from "./SearchResultsPage";
 import { useFavorites } from "./FavoritesContext";
 import { useAuth } from "./AuthContext";
 import { allSeries, allAudioBooks } from "./data";
 import type { Series, AudioBook } from "./data";
 
-type Page = "home" | "video" | "audiobooks" | "login" | "register" | "favorites" | "settings";
+type Page = "home" | "video" | "audiobooks" | "login" | "register" | "favorites" | "settings" | "search";
 
 interface User {
   id: string;
@@ -38,6 +39,7 @@ function App() {
   const [initialTimestamp, setInitialTimestamp] = useState<number | undefined>();
   const [initialAudioEpisodeId, setInitialAudioEpisodeId] = useState<number | undefined>();
   const [initialAudioTimestamp, setInitialAudioTimestamp] = useState<number | undefined>();
+  const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [signedOutToast, setSignedOutToast] = useState(false);
@@ -212,6 +214,11 @@ function App() {
     });
   };
 
+  const handleShowMore = (q: string) => {
+    setSearchQuery(q);
+    navigateTo("search");
+  };
+
   const handleUserUpdate = (updated: User) => {
     setUser(updated);
   };
@@ -249,7 +256,7 @@ function App() {
         />
 
         <div className="pl-0 md:pl-20">
-          <Navbar onSelectSeries={handleOpenVideo} onSelectBook={handleOpenBook} />
+          <Navbar onSelectSeries={handleOpenVideo} onSelectBook={handleOpenBook} onShowMore={handleShowMore} />
 
           <main className={currentPage === "login" || currentPage === "register" ? "" : "pb-24"}>
             <div ref={contentRef}>
@@ -328,6 +335,15 @@ function App() {
                   onBack={() => navigateTo("home")}
                   onUserUpdate={handleUserUpdate}
                   onDeleteAccount={handleDeleteAccount}
+                />
+              )}
+
+              {currentPage === "search" && (
+                <SearchResultsPage
+                  query={searchQuery}
+                  onSelectSeries={handleOpenVideo}
+                  onSelectBook={(bookId) => handleOpenBook(bookId)}
+                  onBack={() => navigateTo("home")}
                 />
               )}
             </div>

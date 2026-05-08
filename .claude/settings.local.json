@@ -26,7 +26,10 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Shaker\\\\Documents\" -Force | ForEach-Object { Write-Host $_.Name })",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Shaker\\\\Documents\\\\Obsidian-Vault\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Shaker\\\\Documents\\\\Obsidian-Vault\" -Force | ForEach-Object { Write-Host $_.Name })",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Shaker\\\\Documents\\\\Obsidian-Vault\\\\DeenStream\" -Force | ForEach-Object { Write-Host $_.Name })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Shaker\\\\Documents\\\\Obsidian-Vault\\\\DeenStream\" -Force | ForEach-Object { Write-Host $_.Name })",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Shaker\\\\Documents\\\\DeenStream\\\\src\" -Recurse -Include \"*.tsx\", \"*.ts\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Get-ChildItem -Name *.tsx, *.ts)"
     ]
   }
 }

@@ -1,44 +1,29 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import { allSeries, allAudioBooks } from "./data";
-import type { Series, AudioBook, Episode, AudioEpisode } from "./data";
+import type { Series, AudioBook } from "./data";
 
 interface NavbarProps {
   onSelectSeries: (seriesId: string, episodeId?: number) => void;
   onSelectBook: (bookId: string, episodeId?: number) => void;
-}
-
-interface EpisodeHit {
-  seriesId: string;
-  seriesTitle: string;
-  thumbnail?: string;
-  episode: Episode;
-}
-
-interface AudioEpisodeHit {
-  bookId: string;
-  bookTitle: string;
-  image: string;
-  episode: AudioEpisode;
+  onShowMore: (query: string) => void;
 }
 
 interface SearchResults {
   series: Series[];
   books: AudioBook[];
-  videoEpisodes: EpisodeHit[];
-  audioEpisodes: AudioEpisodeHit[];
 }
 
-function Navbar({ onSelectSeries, onSelectBook }: NavbarProps) {
+function Navbar({ onSelectSeries, onSelectBook, onShowMore }: NavbarProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResults>({ series: [], books: [], videoEpisodes: [], audioEpisodes: [] });
+  const [results, setResults] = useState<SearchResults>({ series: [], books: [] });
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const runSearch = useCallback((q: string) => {
     const lower = q.toLowerCase().trim();
     if (!lower) {
-      setResults({ series: [], books: [], videoEpisodes: [], audioEpisodes: [] });
+      setResults({ series: [], books: [] });
       return;
     }
     const series = allSeries.filter(s =>
@@ -52,29 +37,7 @@ function Navbar({ onSelectSeries, onSelectBook }: NavbarProps) {
       b.author.toLowerCase().includes(lower)
     ).slice(0, 4);
 
-    const videoEpisodes: EpisodeHit[] = [];
-    for (const s of allSeries) {
-      for (const ep of s.episodes) {
-        if (ep.title.toLowerCase().includes(lower)) {
-          videoEpisodes.push({ seriesId: s.id, seriesTitle: s.title, thumbnail: s.thumbnail, episode: ep });
-          if (videoEpisodes.length >= 4) break;
-        }
-      }
-      if (videoEpisodes.length >= 4) break;
-    }
-
-    const audioEpisodes: AudioEpisodeHit[] = [];
-    for (const b of allAudioBooks) {
-      for (const ep of b.episodes) {
-        if (ep.title.toLowerCase().includes(lower)) {
-          audioEpisodes.push({ bookId: b.id, bookTitle: b.title, image: b.image, episode: ep });
-          if (audioEpisodes.length >= 4) break;
-        }
-      }
-      if (audioEpisodes.length >= 4) break;
-    }
-
-    setResults({ series, books, videoEpisodes, audioEpisodes });
+    setResults({ series, books });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,19 +49,21 @@ function Navbar({ onSelectSeries, onSelectBook }: NavbarProps) {
 
   const clearSearch = () => {
     setQuery("");
-    setResults({ series: [], books: [], videoEpisodes: [], audioEpisodes: [] });
+    setResults({ series: [], books: [] });
   };
 
-  const handleSelect = (type: "series" | "book" | "video-episode" | "audio-episode", id: string, episodeId?: number) => {
+  const handleSelect = (type: "series" | "book", id: string) => {
     clearSearch();
     if (type === "series") onSelectSeries(id);
-    else if (type === "book") onSelectBook(id);
-    else if (type === "video-episode") onSelectSeries(id, episodeId);
-    else onSelectBook(id, episodeId);
+    else onSelectBook(id);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") clearSearch();
+    if (e.key === "Enter" && query.trim()) {
+      onShowMore(query.trim());
+      clearSearch();
+    }
   };
 
   useEffect(() => {
@@ -110,7 +75,7 @@ function Navbar({ onSelectSeries, onSelectBook }: NavbarProps) {
   }, []);
 
   const isOpen = query.trim().length > 0;
-  const hasResults = results.series.length > 0 || results.books.length > 0 || results.videoEpisodes.length > 0 || results.audioEpisodes.length > 0;
+  const hasResults = results.series.length > 0 || results.books.length > 0;
 
   return (
     <nav className="fixed top-0 left-0 w-full z-[55] flex items-center justify-between pl-24 pr-8 py-4 backdrop-blur-md" style={{ background: "linear-gradient(180deg, rgba(10,24,16,0.92) 0%, rgba(8,12,9,0.7) 100%)", borderBottom: "1px solid rgba(22, 196, 127, 0.18)" }}>
@@ -162,34 +127,9 @@ function Navbar({ onSelectSeries, onSelectBook }: NavbarProps) {
                     </>
                   )}
 
-                  {results.videoEpisodes.length > 0 && (
-                    <>
-                      <div className={`px-4 py-2 text-xs font-medium text-white/30 uppercase tracking-wider ${results.series.length > 0 ? "border-t border-white/5" : ""}`}>
-                        Episodes
-                      </div>
-                      {results.videoEpisodes.map(hit => (
-                        <button
-                          key={`${hit.seriesId}-${hit.episode.id}`}
-                          onMouseDown={() => handleSelect("video-episode", hit.seriesId, hit.episode.id)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 text-left transition-colors"
-                        >
-                          {hit.thumbnail ? (
-                            <img src={hit.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg bg-white/10 shrink-0" />
-                          )}
-                          <div className="min-w-0">
-                            <div className="text-sm text-white truncate">{hit.episode.title}</div>
-                            <div className="text-xs text-white/40 truncate">{hit.seriesTitle} · {hit.episode.duration}</div>
-                          </div>
-                        </button>
-                      ))}
-                    </>
-                  )}
-
                   {results.books.length > 0 && (
                     <>
-                      <div className={`px-4 py-2 text-xs font-medium text-white/30 uppercase tracking-wider ${results.series.length > 0 || results.videoEpisodes.length > 0 ? "border-t border-white/5" : ""}`}>
+                      <div className={`px-4 py-2 text-xs font-medium text-white/30 uppercase tracking-wider ${results.series.length > 0 ? "border-t border-white/5" : ""}`}>
                         Audio
                       </div>
                       {results.books.map(b => (
@@ -208,26 +148,15 @@ function Navbar({ onSelectSeries, onSelectBook }: NavbarProps) {
                     </>
                   )}
 
-                  {results.audioEpisodes.length > 0 && (
-                    <>
-                      <div className={`px-4 py-2 text-xs font-medium text-white/30 uppercase tracking-wider ${results.series.length > 0 || results.videoEpisodes.length > 0 || results.books.length > 0 ? "border-t border-white/5" : ""}`}>
-                        Audio Episodes
-                      </div>
-                      {results.audioEpisodes.map(hit => (
-                        <button
-                          key={`${hit.bookId}-${hit.episode.id}`}
-                          onMouseDown={() => handleSelect("audio-episode", hit.bookId, hit.episode.id)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 text-left transition-colors"
-                        >
-                          <img src={hit.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
-                          <div className="min-w-0">
-                            <div className="text-sm text-white truncate">{hit.episode.title}</div>
-                            <div className="text-xs text-white/40 truncate">{hit.bookTitle} · {hit.episode.duration}</div>
-                          </div>
-                        </button>
-                      ))}
-                    </>
-                  )}
+                  <button
+                    onMouseDown={() => { onShowMore(query); clearSearch(); }}
+                    className="w-full px-4 py-3 text-sm font-medium transition-colors border-t border-white/5 text-center"
+                    style={{ color: "#16c47f" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(22,196,127,0.06)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "")}
+                  >
+                    Show all results for "{query}"
+                  </button>
                 </>
               ) : (
                 <div className="px-4 py-6 text-center text-sm text-white/30">

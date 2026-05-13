@@ -13,336 +13,329 @@ export interface Series {
   description: string;
   instructor: string;
   thumbnail?: string;
+  backdrop?: string;
   episodes: Episode[];
 }
 
-export interface AudioEpisode {
-  id: number;
-  title: string;
-  duration: string;
-  url: string;
-}
-
-export interface AudioBook {
-  id: string;
-  title: string;
-  author: string;
-  category: string;
-  image: string;
-  episodes: AudioEpisode[];
-}
-
-// Derives archive.org's auto-generated episode screenshot from a video URL.
-// Archive.org stores a _000001.jpg thumbnail alongside every uploaded video file.
-function archiveThumb(videoUrl: string): string {
-  const m = videoUrl.match(/\/items\/([^/]+)\/(.+)\.mp4$/);
-  if (!m) return "";
-  return `https://archive.org/download/${m[1]}/${m[2]}_000001.jpg`;
-}
+// Big Buck Bunny — Blender Foundation, CC BY 3.0. 1080p cartoon placeholder for all episodes.
+const PLACEHOLDER = "https://upload.wikimedia.org/wikipedia/commons/transcoded/c/c0/Big_Buck_Bunny_4K.webm/Big_Buck_Bunny_4K.webm.1080p.vp9.webm";
 
 export const allSeries: Series[] = [
+  // ── Anime ──────────────────────────────────────────────────────────────────
   {
-    id: "tawheed-01",
-    title: "Tawheed - The Three Fundamental Principles",
-    category: "Aqeedah",
-    instructor: "Sheikh Ahmad Musa Jibril",
-    thumbnail: "https://e3.365dm.com/17/06/1600x900/0ee0f52eb177ff5801a44709978412578c6378b714792605ab2e0cad9586f2a8_3973042.jpg?20170608032802",
+    id: "aot-s1",
+    title: "Attack on Titan",
+    category: "Anime",
+    instructor: "MAPPA",
+    thumbnail: "https://cdn.myanimelist.net/images/anime/10/47347.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/rqbCbjB19amtOtFQbb3K2lgm2zv.jpg",
     description:
-      "Based on the classical text Al-Usool Ath-Thalaathah. This lesson covers the three questions of the grave.",
-    episodes: (
-      [
-        {
-          id: 1,
-          title: "Episode 1",
-          duration: "29:47",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%201%20%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 2,
-          title: "Episode 2",
-          duration: "41:17",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%202%20%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 3,
-          title: "Episode 3",
-          duration: "1:11:00",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%203%20%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 4,
-          title: "Episode 4",
-          duration: "1:20:14",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%204%20%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 5,
-          title: "Episode 5",
-          duration: "56:57",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%205%20%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 6,
-          title: "Episode 6",
-          duration: "47:33",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%206%20%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20%20Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 7,
-          title: "Episode 7",
-          duration: "30:27",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%207%20%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20%20Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 8,
-          title: "Episode 8",
-          duration: "1:03:55",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%238%20%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20%20Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 9,
-          title: "Episode 9",
-          duration: "1:17:43",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%239%20%20DAWAH%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20%20Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 10,
-          title: "Episode 10",
-          duration: "1:04:38",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2310%20%20PATIENCE%20I%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20%20Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 11,
-          title: "Episode 11",
-          duration: "1:06:50",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2311%20%20PATIENCE%20II%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20%20Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 12,
-          title: "Episode 12",
-          duration: "1:16:31",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2313%20%28Suret%20Al-Asr%20II%29%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20-%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 13,
-          title: "Episode 13",
-          duration: "1:16:31",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2313%20%28Suret%20Al-Asr%20II%29%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20-%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 14,
-          title: "Episode 14",
-          duration: "1:03:56",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2314%20%28The%20Creator%29%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20-%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 15,
-          title: "Episode 15",
-          duration: "1:05:35",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2315%20%28All-Provider%29%20Explanation%20of%20The%20Three%20Fundamental%20Principles%20-%20Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 16,
-          title: "Episode 16",
-          duration: "50:00",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2316%20%28Purpose%20%26%20Submission%29%20Explanation%20Of%20The%20Thee%20Fundamental%20Principles%20-%20Sh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 17,
-          title: "Episode 17",
-          duration: "1:05:53",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2317%28Obedience%20%26%20Consequence%29%20Explanation%20Of%20The%20Thee%20Fundamental%20Principles%20-Sh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 18,
-          title: "Episode 18",
-          duration: "56:53",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2318%28Shirk%20al-Uluhiyyah%201%29%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Sh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 19,
-          title: "Episode 19",
-          duration: "57:37",
-          url: "https://ia802807.us.archive.org/10/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2319%28Shirk%20al-Uluhiyyah%20II%29%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Sh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 20,
-          title: "Episode 20",
-          duration: "59:25",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2320%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 21,
-          title: "Episode 21",
-          duration: "50:46",
-          url: "https://ia802807.us.archive.org/10/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2321%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 22,
-          title: "Episode 22",
-          duration: "57:04",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2322%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 23,
-          title: "Episode 23",
-          duration: "37:17",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2323%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 24,
-          title: "Episode 24",
-          duration: "43:11",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2324%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 25,
-          title: "Episode 25",
-          duration: "1:02:18",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2325%20-%20Sincerity%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 26,
-          title: "Episode 26",
-          duration: "44:16",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2326%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 27,
-          title: "Episode 27",
-          duration: "52:06",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2327%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 28,
-          title: "Episode 28",
-          duration: "1:04:48",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2328%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 29,
-          title: "Episode 29",
-          duration: "1:05:38",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2329%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 30,
-          title: "Episode 30",
-          duration: "49:17",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2330%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 31,
-          title: "Episode 31",
-          duration: "57:09",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2331%20-%20Duaa%27%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 32,
-          title: "Episode 32",
-          duration: "57:24",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2332%20-%20Fear%20%28Kawf%29%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 33,
-          title: "Episode 33",
-          duration: "1:19:52",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2333%20-%20Hope%20%26%20Reliance%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Sh.%20Ahmad%20Jibril.mp4",
-        },
-        {
-          id: 34,
-          title: "Episode 34",
-          duration: "59:03",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2334%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 35,
-          title: "Episode 35",
-          duration: "37:29",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2335%20-%20%27Inabah%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 36,
-          title: "Episode 36",
-          duration: "56:35",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2336%20-%20Isti%27anah%20-%20Explanation%20Of%20The%20Three%20Fundamental%20Principles%20-Shaykh%20Ahmad%20Musa%20Jibril.mp4",
-        },
-        {
-          id: 37,
-          title: "Episode 37",
-          duration: "1:06:26",
-          url: "https://dn710309.ca.archive.org/0/items/TAWHEEDExplanationOfTheThreeFundamentalPrinciples/TAWHEED%20%2337%20-%20Istighatha-Isti%27adha%20-%20Explanation%20Of%20The%203%20Fundamental%20Principles%20-%20Sh.%20Ahmad%20Jibril.mp4",
-        },
-      ] as Omit<Episode, "thumbnail">[]
-    ).map((ep, i) => ({
-      ...ep,
-      // Episode 1 inherits the series thumbnail via the series.thumbnail fallback.
-      // Episodes 2+ get the archive.org auto-generated screenshot for their specific file.
-      ...(i > 0 && { thumbnail: archiveThumb(ep.url) }),
-    })),
-  },
-  {
-    id: "fiqh-fasting-01",
-    title: "Comprehensive Fiqh of Fasting",
-    category: "Fiqh",
-    instructor: "Sheikh Ahmad Musa Jibril",
-    thumbnail: "https://archive.org/services/img/ComprehensiveFiqhOfFasting",
-    description:
-      "A comprehensive study of the Fiqh of fasting based on Zaad al-Mustaqni, covering all rulings related to Ramadan, voluntary fasts, and the conditions that affect the fast.",
-    episodes: (
-      [
-        { id: 1,  title: "Episode 1",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/01%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%231%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 2,  title: "Episode 2",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/02%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%232%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 3,  title: "Episode 3",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/03%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%233%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 4,  title: "Episode 4",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/04%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%234%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 5,  title: "Episode 5",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/05%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%235%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 6,  title: "Episode 6",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/06%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%236%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 7,  title: "Episode 7",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/07%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%237%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 8,  title: "Episode 8",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/08%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%238%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 9,  title: "Episode 9",  duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/09%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%239%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 10, title: "Episode 10", duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/10%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%2310%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 11, title: "Episode 11", duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/11%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%2311%20%20Zaad%20al-Mustaqni%20%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 12, title: "Episode 12", duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/12%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%2312%20-%20Zaad%20al-Mustaqni%20-%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 13, title: "Episode 13", duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/13%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%2313%20-%20Zaad%20al-Mustaqni%20-%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 14, title: "Episode 14", duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/14%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%2314%20%20-%20Zaad%20al-Mustaqni%20-%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 15, title: "Episode 15", duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/15%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%2315%20-%20Zaad%20al-Mustaqni%20-%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-        { id: 16, title: "Episode 16", duration: "", url: "https://archive.org/download/ComprehensiveFiqhOfFasting/16%20The%20Comprehensive%20Fiqh%20of%20Fasting%20%2316%20-%20Zaad%20al-Mustaqni%20-%20-%20Shaykh%20Ahmad%20Jibril.mp4" },
-      ] as Omit<Episode, "thumbnail">[]
-    ).map((ep, i) => ({
-      ...ep,
-      ...(i > 0 && { thumbnail: archiveThumb(ep.url) }),
-    })),
-  },
-];
-
-export const allAudioBooks: AudioBook[] = [
-  {
-    id: "book-1",
-    title: "The Lives of the Prophets",
-    author: "Imaam Anwar Al-Awlaki",
-    category: "Seerah",
-    image: "https://adviceforparadise.com/media/pic-series/Lives_of_the_Prophets.png",
+      "Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called Titans. Survivors built three concentric walls to protect themselves. When the outer wall crumbles, Eren Yeager vows to destroy every Titan that walks the earth.",
     episodes: [
-      {
-        id: 1,
-        title: "Introduction - Story Of Creation",
-        duration: "01:04:27",
-        url: "https://dn721903.ca.archive.org/0/items/TheLivesOfTheProphetsByAnwarAl-Awlaki/01%20-%20Introduction%20-%20Story%20Of%20Creation.mp3",
-      },
-      {
-        id: 2,
-        title: "Adam (Cont.) - Idris - Sheeth - Hud A.S.",
-        duration: "01:07:59",
-        url: "https://dn721903.ca.archive.org/0/items/TheLivesOfTheProphetsByAnwarAl-Awlaki/02%20-%20Adam%20%28Cont.%29%20-%20Idris%20-%20Sheeth%20-%20Hud%20A.S..mp3",
-      },
+      { id: 1,  title: "To You, in 2000 Years: The Fall of Shiganshina, Part 1", duration: "24:00", url: PLACEHOLDER },
+      { id: 2,  title: "That Day: The Fall of Shiganshina, Part 2",              duration: "24:00", url: PLACEHOLDER },
+      { id: 3,  title: "A Dim Light Amid Despair: Humanity's Comeback, Part 1",  duration: "24:00", url: PLACEHOLDER },
+      { id: 4,  title: "The Night of the Closing Ceremony: Humanity's Comeback, Part 2", duration: "24:00", url: PLACEHOLDER },
+      { id: 5,  title: "First Battle: The Struggle for Trost, Part 1",           duration: "24:00", url: PLACEHOLDER },
+      { id: 6,  title: "The World the Girl Saw: The Struggle for Trost, Part 2", duration: "24:00", url: PLACEHOLDER },
+      { id: 7,  title: "Small Blade: The Struggle for Trost, Part 3",            duration: "24:00", url: PLACEHOLDER },
+      { id: 8,  title: "I Can Hear His Heartbeat: The Struggle for Trost, Part 4", duration: "24:00", url: PLACEHOLDER },
+      { id: 9,  title: "Whereabouts of His Left Arm: The Struggle for Trost, Part 5", duration: "24:00", url: PLACEHOLDER },
+      { id: 10, title: "Response: The Struggle for Trost, Part 6",               duration: "24:00", url: PLACEHOLDER },
+      { id: 11, title: "Idol: The Struggle for Trost, Part 7",                   duration: "24:00", url: PLACEHOLDER },
+      { id: 12, title: "Wound: The Struggle for Trost, Part 8",                  duration: "24:00", url: PLACEHOLDER },
     ],
   },
   {
-    id: "book-2",
-    title: "Kitab At-Tawheed",
-    author: "Sheikh Ahmad Musa Jibril",
-    category: "Aqeedah",
-    image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=400",
-    episodes: [],
+    id: "demon-slayer",
+    title: "Demon Slayer: Kimetsu no Yaiba",
+    category: "Anime",
+    instructor: "ufotable",
+    thumbnail: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/3GQKYh6Trm8pxd2AypovoYQf4Ay.jpg",
+    description:
+      "Tanjiro Kamado's peaceful life is shattered when his family is slaughtered by a demon. His sister Nezuko survives but is transformed into one. Determined to restore her humanity, Tanjiro sets out to become a Demon Slayer.",
+    episodes: [
+      { id: 1,  title: "Cruelty",                            duration: "26:00", url: PLACEHOLDER  },
+      { id: 2,  title: "Trainer Sakonji Urokodaki",          duration: "24:00", url: PLACEHOLDER  },
+      { id: 3,  title: "Sabito and Makomo",                  duration: "24:00", url: PLACEHOLDER  },
+      { id: 4,  title: "Final Selection",                    duration: "24:00", url: PLACEHOLDER  },
+      { id: 5,  title: "My Own Steel",                       duration: "24:00", url: PLACEHOLDER  },
+      { id: 6,  title: "Swordsman Accompanying a Demon",     duration: "24:00", url: PLACEHOLDER  },
+      { id: 7,  title: "Muzan Kibutsuji",                    duration: "24:00", url: PLACEHOLDER  },
+      { id: 8,  title: "The Smell of Enchanting Blood",      duration: "24:00", url: PLACEHOLDER  },
+      { id: 9,  title: "Temari Demon and Arrow Demon",       duration: "24:00", url: PLACEHOLDER  },
+      { id: 10, title: "Together Forever",                   duration: "24:00", url: PLACEHOLDER  },
+      { id: 11, title: "Tsuzumi Mansion",                    duration: "24:00", url: PLACEHOLDER },
+      { id: 12, title: "The Boar Bares Its Fangs, Zenitsu Sleeps", duration: "24:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "jjk-s1",
+    title: "Jujutsu Kaisen",
+    category: "Anime",
+    instructor: "MAPPA",
+    thumbnail: "https://cdn.myanimelist.net/images/anime/1171/109222.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/lthkKBLe1rX6iThgVFg22O02sJw.jpg",
+    description:
+      "High schooler Yuji Itadori swallows a cursed finger belonging to the demon king Ryomen Sukuna to protect his friends and is thrust into the dangerous world of Jujutsu Sorcery.",
+    episodes: [
+      { id: 1,  title: "Ryomen Sukuna",                                    duration: "24:00", url: PLACEHOLDER  },
+      { id: 2,  title: "For Myself",                                       duration: "24:00", url: PLACEHOLDER  },
+      { id: 3,  title: "Girl of Steel",                                    duration: "24:00", url: PLACEHOLDER  },
+      { id: 4,  title: "Curse Womb Must Die",                              duration: "24:00", url: PLACEHOLDER  },
+      { id: 5,  title: "Curse Womb Must Die II",                           duration: "24:00", url: PLACEHOLDER  },
+      { id: 6,  title: "After Rain",                                       duration: "24:00", url: PLACEHOLDER  },
+      { id: 7,  title: "Assault",                                          duration: "24:00", url: PLACEHOLDER  },
+      { id: 8,  title: "Boredom",                                          duration: "24:00", url: PLACEHOLDER  },
+      { id: 9,  title: "Small Fry and Reverse Retribution",                duration: "24:00", url: PLACEHOLDER  },
+      { id: 10, title: "Idle Transfiguration",                             duration: "24:00", url: PLACEHOLDER  },
+      { id: 11, title: "Narrow-Minded",                                    duration: "24:00", url: PLACEHOLDER },
+      { id: 12, title: "To You, Someday",                                  duration: "24:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "mha-s1",
+    title: "My Hero Academia",
+    category: "Anime",
+    instructor: "Bones",
+    thumbnail: "https://cdn.myanimelist.net/images/anime/10/78745.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/ol0H2DGp4ifBHA4JDlCpwJWxnY2.jpg",
+    description:
+      "In a world where 80% of humanity has superpowers, Izuku Midoriya is born without one. Despite this, he dreams of becoming the greatest hero and catches the eye of the world's number one hero, All Might.",
+    episodes: [
+      { id: 1,  title: "Izuku Midoriya: Origin",         duration: "24:00", url: PLACEHOLDER  },
+      { id: 2,  title: "What It Takes to Be a Hero",     duration: "24:00", url: PLACEHOLDER  },
+      { id: 3,  title: "Roaring Muscles",                duration: "24:00", url: PLACEHOLDER  },
+      { id: 4,  title: "Start Line",                     duration: "24:00", url: PLACEHOLDER  },
+      { id: 5,  title: "What I Can Do for Now",          duration: "24:00", url: PLACEHOLDER  },
+      { id: 6,  title: "Rage, You Damned Nerd",          duration: "24:00", url: PLACEHOLDER  },
+      { id: 7,  title: "Deku vs. Kacchan",               duration: "24:00", url: PLACEHOLDER  },
+      { id: 8,  title: "Bakugo's Start Line",            duration: "24:00", url: PLACEHOLDER  },
+      { id: 9,  title: "Yeah, Just Do Your Best, Iida!", duration: "24:00", url: PLACEHOLDER  },
+      { id: 10, title: "Encounter with the Unknown",     duration: "24:00", url: PLACEHOLDER  },
+      { id: 11, title: "Game Over",                      duration: "24:00", url: PLACEHOLDER },
+      { id: 12, title: "All Might",                      duration: "24:00", url: PLACEHOLDER },
+      { id: 13, title: "In Each of Our Hearts",          duration: "24:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "one-piece",
+    title: "One Piece",
+    category: "Anime",
+    instructor: "Toei Animation",
+    thumbnail: "https://cdn.myanimelist.net/images/anime/6/73245.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/4Mt7WHox67uJ1yErwTBFcV8KWgG.jpg",
+    description:
+      "Monkey D. Luffy sets sail to find the legendary treasure One Piece and become King of the Pirates. Gifted with the power of the Gum-Gum Fruit, he gathers a crew of extraordinary misfits along the way.",
+    episodes: [
+      { id: 1,  title: "I'm Luffy! The Man Who's Gonna Be King of the Pirates!",  duration: "24:00", url: PLACEHOLDER  },
+      { id: 2,  title: "The Great Swordsman Appears! Pirate Hunter Roronoa Zoro!", duration: "24:00", url: PLACEHOLDER  },
+      { id: 3,  title: "Morgan versus Luffy! Who's This Beautiful Young Girl?",    duration: "24:00", url: PLACEHOLDER  },
+      { id: 4,  title: "Luffy's Past! The Red-Haired Shanks Appears!",            duration: "24:00", url: PLACEHOLDER  },
+      { id: 5,  title: "A Terrifying Mysterious Power! Captain Buggy the Clown!", duration: "24:00", url: PLACEHOLDER  },
+      { id: 6,  title: "Desperate Situation! Beast Tamer Mohji vs. Luffy!",       duration: "24:00", url: PLACEHOLDER  },
+      { id: 7,  title: "Epic Showdown! Swordsman Zoro vs. Acrobat Cabaji!",       duration: "24:00", url: PLACEHOLDER  },
+      { id: 8,  title: "Who Is the Victor? Devil Fruit Power Showdown!",          duration: "24:00", url: PLACEHOLDER  },
+      { id: 9,  title: "The Honorable Liar? Captain Usopp!",                      duration: "24:00", url: PLACEHOLDER  },
+      { id: 10, title: "The Weirdly Talented Nami and the Cheat-master Buggy!",   duration: "24:00", url: PLACEHOLDER  },
+      { id: 11, title: "Expose the Pirate-Hating Female Warrior!",                duration: "24:00", url: PLACEHOLDER },
+      { id: 12, title: "Clash with the Black Cat Pirates!",                       duration: "24:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "fma-brotherhood",
+    title: "Fullmetal Alchemist: Brotherhood",
+    category: "Anime",
+    instructor: "Bones",
+    thumbnail: "https://cdn.myanimelist.net/images/anime/1223/96541.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/A6tMQAo6t6eRFCPhsrShmxZLqFB.jpg",
+    description:
+      "Two brothers use alchemy in an attempt to resurrect their deceased mother, only to lose parts of their own bodies. Now they search for the Philosopher's Stone to restore what was lost.",
+    episodes: [
+      { id: 1,  title: "Fullmetal Alchemist",                  duration: "24:00", url: PLACEHOLDER  },
+      { id: 2,  title: "The First Day",                        duration: "24:00", url: PLACEHOLDER  },
+      { id: 3,  title: "City of Heresy",                       duration: "24:00", url: PLACEHOLDER  },
+      { id: 4,  title: "An Alchemist's Anguish",               duration: "24:00", url: PLACEHOLDER  },
+      { id: 5,  title: "Rain of Sorrows",                      duration: "24:00", url: PLACEHOLDER  },
+      { id: 6,  title: "Road of Hope",                         duration: "24:00", url: PLACEHOLDER  },
+      { id: 7,  title: "Hidden Truths",                        duration: "24:00", url: PLACEHOLDER  },
+      { id: 8,  title: "The Fifth Laboratory",                 duration: "24:00", url: PLACEHOLDER  },
+      { id: 9,  title: "Created Feelings",                     duration: "24:00", url: PLACEHOLDER  },
+      { id: 10, title: "Separate Destinations",                duration: "24:00", url: PLACEHOLDER  },
+      { id: 11, title: "Miracle at Rush Valley",               duration: "24:00", url: PLACEHOLDER },
+      { id: 12, title: "One Is All, All Is One",               duration: "24:00", url: PLACEHOLDER },
+    ],
+  },
+
+  // ── Animated Movies ────────────────────────────────────────────────────────
+  {
+    id: "toy-story",
+    title: "Toy Story",
+    category: "Animated",
+    instructor: "Pixar",
+    thumbnail: "https://image.tmdb.org/t/p/w500/uXDfjJbdP4ijW5hWSBrPrlKpxab.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/3Rfvhy1Nl6sSGJwyjb0QiZzZYlB.jpg",
+    description:
+      "When a new toy called Buzz Lightyear arrives and steals the spotlight, cowboy doll Woody finds himself cast aside. The two rivals must work together to escape and make it back to their owner Andy.",
+    episodes: [
+      { id: 1, title: "Toy Story", duration: "1:21:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "finding-nemo",
+    title: "Finding Nemo",
+    category: "Animated",
+    instructor: "Pixar",
+    thumbnail: "https://image.tmdb.org/t/p/w500/5lc6nQc0VhWFYFbNv016xze8Jvy.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/eCynaAOgYYiw5yN5lBwz3IxqvaW.jpg",
+    description:
+      "After his son Nemo is captured and taken to a dentist's fish tank in Sydney, overprotective clownfish Marlin embarks on a journey across the ocean to bring him home.",
+    episodes: [
+      { id: 1, title: "Finding Nemo", duration: "1:40:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "the-incredibles",
+    title: "The Incredibles",
+    category: "Animated",
+    instructor: "Pixar",
+    thumbnail: "https://image.tmdb.org/t/p/w500/2LqaLgk4Z226KkgPJuiOQ58wvrm.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/lxwzY9vNwjDgxWKt3zZ6zcU6rEJ.jpg",
+    description:
+      "A family of undercover superheroes, while trying to live a quiet suburban life, are forced into action to save the world from a diabolical villain who despises all things super.",
+    episodes: [
+      { id: 1, title: "The Incredibles", duration: "1:55:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "wall-e",
+    title: "WALL-E",
+    category: "Animated",
+    instructor: "Pixar",
+    thumbnail: "https://image.tmdb.org/t/p/w500/hbhFnRzzg6ZDmm8YAmxBnQpQIPh.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/nYs4ZwnJBK4AgljhvzwNz7fpr3E.jpg",
+    description:
+      "In the distant future, a small waste-collecting robot accidentally embarks on a space journey that will ultimately decide the fate of mankind and his newfound love.",
+    episodes: [
+      { id: 1, title: "WALL-E", duration: "1:38:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "up",
+    title: "Up",
+    category: "Animated",
+    instructor: "Pixar",
+    thumbnail: "https://image.tmdb.org/t/p/w500/nOEzQanBDekstniJGbH3iGLCA75.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/hGGC9gKo7CFE3fW07RA587e5kol.jpg",
+    description:
+      "Seventy-eight-year-old Carl Fredricksen ties thousands of balloons to his house and flies to South America to fulfil his late wife's dream — but a young stowaway named Russell comes along for the ride.",
+    episodes: [
+      { id: 1, title: "Up", duration: "1:36:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "coco",
+    title: "Coco",
+    category: "Animated",
+    instructor: "Pixar",
+    thumbnail: "https://image.tmdb.org/t/p/w500/6Ryitt95xrO8KXuqRGm1fUuNwqF.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/g7CHF8gTLGooTbP4GznIGwaqAGL.jpg",
+    description:
+      "Aspiring musician Miguel is magically transported to the vibrant Land of the Dead, where he seeks out his great-great-grandfather — a legendary singer — to prove his family's musical destiny.",
+    episodes: [
+      { id: 1, title: "Coco", duration: "1:45:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "spirited-away",
+    title: "Spirited Away",
+    category: "Anime",
+    instructor: "Studio Ghibli",
+    thumbnail: "https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/dyJvKsNs2KP8qQnAXbRwDjblViy.jpg",
+    description:
+      "Ten-year-old Chihiro stumbles into a spirit world and must find a way to free herself and her parents, who have been turned into pigs by a mysterious witch.",
+    episodes: [
+      { id: 1, title: "Spirited Away", duration: "2:04:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "princess-mononoke",
+    title: "Princess Mononoke",
+    category: "Anime",
+    instructor: "Studio Ghibli",
+    thumbnail: "https://image.tmdb.org/t/p/w500/cMYCDADoLKLbB83g4WnJegaZimC.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/gl0jzn4BupSbL2qMVeqrjKkF9Js.jpg",
+    description:
+      "Young warrior Ashitaka becomes embroiled in a war between the gods of a forest and the humans who consume its resources. He seeks to find harmony, but both sides are beyond compromise.",
+    episodes: [
+      { id: 1, title: "Princess Mononoke", duration: "2:14:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "my-neighbor-totoro",
+    title: "My Neighbor Totoro",
+    category: "Anime",
+    instructor: "Studio Ghibli",
+    thumbnail: "https://image.tmdb.org/t/p/w500/rtGDOeG9LzoerkDGZF9dnVeLppL.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/6O1mOoTXuc1WqjKd2R7MFQHZ7Eb.jpg",
+    description:
+      "Two young sisters move to the countryside and discover that the nearby forest is inhabited by magical creatures — including the gentle and enormous forest spirit, Totoro.",
+    episodes: [
+      { id: 1, title: "My Neighbor Totoro", duration: "1:26:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "howls-moving-castle",
+    title: "Howl's Moving Castle",
+    category: "Anime",
+    instructor: "Studio Ghibli",
+    thumbnail: "https://image.tmdb.org/t/p/w500/13kOl2v0nD2OLbVSHnHk8GUFEhO.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/nv5wwZou159v5OC61i4ElR7OqyY.jpg",
+    description:
+      "Sophie, a young hat-maker, is cursed by a witch to live as an elderly woman. Her only hope is the wizard Howl and his magnificent moving castle.",
+    episodes: [
+      { id: 1, title: "Howl's Moving Castle", duration: "1:59:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "shrek",
+    title: "Shrek",
+    category: "Animated",
+    instructor: "DreamWorks",
+    thumbnail: "https://image.tmdb.org/t/p/w500/iB64vpL3dIObOtMZgX3RqdVdQDc.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/40Wtp7kMG6mZ4d5T1jfrd8qrvD4.jpg",
+    description:
+      "A green ogre named Shrek finds his swamp invaded by fairy-tale creatures banished by the evil Lord Farquaad. To reclaim his home he sets out on a quest to rescue Princess Fiona from a dragon-guarded castle.",
+    episodes: [
+      { id: 1, title: "Shrek", duration: "1:30:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "how-to-train-your-dragon",
+    title: "How to Train Your Dragon",
+    category: "Animated",
+    instructor: "DreamWorks",
+    thumbnail: "https://image.tmdb.org/t/p/w500/ygGmAO60t8GyqUo9xYeYxSZAR3b.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/59vDC1BuEQvti24OMr0ZvtAK6R1.jpg",
+    description:
+      "A young Viking who aspires to hunt dragons befriends one instead. His unlikely bond with the fearsome Night Fury dragon changes his world and challenges everything his tribe believes about dragons.",
+    episodes: [
+      { id: 1, title: "How to Train Your Dragon", duration: "1:38:00", url: PLACEHOLDER },
+    ],
+  },
+  {
+    id: "spider-verse",
+    title: "Spider-Man: Into the Spider-Verse",
+    category: "Animated",
+    instructor: "Sony Pictures",
+    thumbnail: "https://image.tmdb.org/t/p/w500/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg",
+    backdrop: "https://image.tmdb.org/t/p/w1280/8mnXR9rey5uQ08rZAvzojKWbDQS.jpg",
+    description:
+      "Miles Morales, a Brooklyn teen, is suddenly thrust into the multiverse and must team up with Spider-People from alternate realities to stop a threat to all dimensions.",
+    episodes: [
+      { id: 1, title: "Spider-Man: Into the Spider-Verse", duration: "1:57:00", url: PLACEHOLDER },
+    ],
   },
 ];

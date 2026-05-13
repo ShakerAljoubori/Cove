@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoHeartOutline, IoHeart, IoBookmark, IoBookmarkOutline, IoThumbsUp } from "react-icons/io5";
-import { allSeries, allAudioBooks } from "./data";
-import type { AudioBook, Series, Episode, AudioEpisode } from "./data";
+import { allSeries } from "./data";
+import type { Series, Episode } from "./data";
 import { useFavorites } from "./FavoritesContext";
 
 const spring = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -12,7 +12,6 @@ interface FavoritesProps {
   onLogin: () => void;
   onRegister: () => void;
   onSelectSeries: (seriesId: string, episodeId?: number) => void;
-  onSelectBook: (book: AudioBook, episodeId?: number) => void;
 }
 
 // ─── Login Gate ────────────────────────────────────────────────────────────────
@@ -36,7 +35,7 @@ function LoginGate({ onLogin, onRegister }: { onLogin: () => void; onRegister: (
         >
           <h2 className="text-2xl font-bold text-white">Sign in to see your favorites</h2>
           <p className="text-sm text-white/40 leading-relaxed">
-            Save series and bookmark individual lectures to access them anytime.
+            Save series and bookmark individual episodes to access them anytime.
           </p>
         </motion.div>
         <motion.div
@@ -48,7 +47,7 @@ function LoginGate({ onLogin, onRegister }: { onLogin: () => void; onRegister: (
           <button
             onClick={onLogin}
             className="px-6 py-2.5 text-black font-bold rounded-xl hover:brightness-110 transition-all active:scale-[0.98]"
-            style={{ background: "linear-gradient(135deg, #22e696 0%, #16c47f 60%, #0db36e 100%)" }}
+            style={{ background: "linear-gradient(135deg, #7b9df9 0%, #4f7df7 60%, #3461e0 100%)" }}
           >
             Sign In
           </button>
@@ -65,78 +64,40 @@ function LoginGate({ onLogin, onRegister }: { onLogin: () => void; onRegister: (
 }
 
 // ─── Saved Series Tab ──────────────────────────────────────────────────────────
-function SavedSeriesTab({
-  onSelectSeries,
-  onSelectBook,
-}: {
-  onSelectSeries: (id: string, episodeId?: number) => void;
-  onSelectBook: (book: AudioBook, episodeId?: number) => void;
-}) {
-  const { seriesIds, bookIds, toggleSeries, toggleBook } = useFavorites();
+function SavedSeriesTab({ onSelectSeries }: { onSelectSeries: (id: string, episodeId?: number) => void }) {
+  const { seriesIds, toggleSeries } = useFavorites();
   const series = allSeries.filter((s) => seriesIds.includes(s.id));
-  const books = allAudioBooks.filter((b) => bookIds.includes(b.id));
 
-  if (series.length === 0 && books.length === 0) {
+  if (series.length === 0) {
     return (
       <EmptyState
         icon={<IoHeartOutline className="text-4xl text-white/20" />}
         text="No saved series yet"
-        sub="Tap the heart icon on any series or audiobook to save it here."
+        sub="Tap the heart icon on any series to save it here."
       />
     );
   }
 
   return (
-    <div className="space-y-10">
-      {series.length > 0 && (
-        <section className="space-y-4">
-          <SectionHeader label="Video Lectures" count={series.length} />
-          <div className="flex flex-wrap gap-4">
-            <AnimatePresence mode="popLayout">
-              {series.map((s, i) => (
-                <SeriesCard
-                  key={s.id}
-                  series={s}
-                  index={i}
-                  onSelect={() => onSelectSeries(s.id)}
-                  onRemove={() => toggleSeries(s.id)}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
-        </section>
-      )}
-      {books.length > 0 && (
-        <section className="space-y-4">
-          <SectionHeader label="Audio Books" count={books.length} />
-          <div className="flex flex-wrap gap-4">
-            <AnimatePresence mode="popLayout">
-              {books.map((b, i) => (
-                <BookCard
-                  key={b.id}
-                  book={b}
-                  index={i}
-                  onSelect={() => onSelectBook(b)}
-                  onRemove={() => toggleBook(b.id)}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
-        </section>
-      )}
+    <div className="flex flex-wrap gap-4">
+      <AnimatePresence mode="popLayout">
+        {series.map((s, i) => (
+          <SeriesCard
+            key={s.id}
+            series={s}
+            index={i}
+            onSelect={() => onSelectSeries(s.id)}
+            onRemove={() => toggleSeries(s.id)}
+          />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
 
 // ─── Saved Lectures Tab ────────────────────────────────────────────────────────
-function SavedLecturesTab({
-  onSelectSeries,
-  onSelectBook,
-}: {
-  onSelectSeries: (id: string, episodeId?: number) => void;
-  onSelectBook: (book: AudioBook, episodeId?: number) => void;
-}) {
-  const { videoEpisodes, audioEpisodes, toggleVideoEpisode, toggleAudioEpisode } = useFavorites();
+function SavedLecturesTab({ onSelectSeries }: { onSelectSeries: (id: string, episodeId?: number) => void }) {
+  const { videoEpisodes, toggleVideoEpisode } = useFavorites();
 
   type VideoGroup = { series: Series; episodes: Episode[] };
   const videoGroups = videoEpisodes.reduce<Record<string, VideoGroup>>((acc, { seriesId, episodeId }) => {
@@ -149,92 +110,44 @@ function SavedLecturesTab({
     return acc;
   }, {});
 
-  type AudioGroup = { book: AudioBook; episodes: AudioEpisode[] };
-  const audioGroups = audioEpisodes.reduce<Record<string, AudioGroup>>((acc, { bookId, episodeId }) => {
-    const book = allAudioBooks.find((b) => b.id === bookId);
-    if (!book) return acc;
-    const episode = book.episodes.find((e) => e.id === episodeId);
-    if (!episode) return acc;
-    if (!acc[bookId]) acc[bookId] = { book, episodes: [] };
-    acc[bookId].episodes.push(episode);
-    return acc;
-  }, {});
-
-  const hasVideo = Object.keys(videoGroups).length > 0;
-  const hasAudio = Object.keys(audioGroups).length > 0;
-
-  if (!hasVideo && !hasAudio) {
+  if (Object.keys(videoGroups).length === 0) {
     return (
       <EmptyState
         icon={<IoBookmarkOutline className="text-4xl text-white/20" />}
-        text="No bookmarked lectures yet"
+        text="No bookmarked episodes yet"
         sub="Tap the bookmark icon on any episode to save it here."
       />
     );
   }
 
   return (
-    <div className="space-y-10">
-      {hasVideo && (
-        <section className="space-y-4">
-          <SectionHeader label="Video Lectures" count={videoEpisodes.length} />
-          <div className="space-y-6">
-            {Object.values(videoGroups).map(({ series, episodes }) => (
-              <div key={series.id} className="space-y-2">
-                <button
-                  onClick={() => onSelectSeries(series.id)}
-                  className="text-xs font-bold text-[#16C47F] uppercase tracking-widest hover:underline"
-                >
-                  {series.title}
-                </button>
-                <AnimatePresence mode="popLayout">
-                  {episodes.map((ep, i) => (
-                    <EpisodeRow
-                      key={ep.id}
-                      index={i}
-                      title={ep.title}
-                      duration={ep.duration}
-                      onPlay={() => onSelectSeries(series.id, ep.id)}
-                      onRemove={() => toggleVideoEpisode(series.id, ep.id)}
-                      isVideo
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
-            ))}
+    <div className="space-y-6">
+      <SectionHeader label="Video Episodes" count={videoEpisodes.length} />
+      <div className="space-y-6">
+        {Object.values(videoGroups).map(({ series, episodes }) => (
+          <div key={series.id} className="space-y-2">
+            <button
+              onClick={() => onSelectSeries(series.id)}
+              className="text-xs font-bold uppercase tracking-widest hover:underline"
+              style={{ color: "#4f7df7" }}
+            >
+              {series.title}
+            </button>
+            <AnimatePresence mode="popLayout">
+              {episodes.map((ep, i) => (
+                <EpisodeRow
+                  key={ep.id}
+                  index={i}
+                  title={ep.title}
+                  duration={ep.duration}
+                  onPlay={() => onSelectSeries(series.id, ep.id)}
+                  onRemove={() => toggleVideoEpisode(series.id, ep.id)}
+                />
+              ))}
+            </AnimatePresence>
           </div>
-        </section>
-      )}
-      {hasAudio && (
-        <section className="space-y-4">
-          <SectionHeader label="Audio Lectures" count={audioEpisodes.length} />
-          <div className="space-y-6">
-            {Object.values(audioGroups).map(({ book, episodes }) => (
-              <div key={book.id} className="space-y-2">
-                <button
-                  onClick={() => onSelectBook(book)}
-                  className="text-xs font-bold text-[#16C47F] uppercase tracking-widest hover:underline"
-                >
-                  {book.title}
-                </button>
-                <AnimatePresence mode="popLayout">
-                  {episodes.map((ep, i) => (
-                    <EpisodeRow
-                      key={ep.id}
-                      index={i}
-                      title={ep.title}
-                      duration={ep.duration}
-                      onPlay={() => onSelectBook(book, ep.id)}
-                      onRemove={() => toggleAudioEpisode(book.id, ep.id)}
-                      isVideo={false}
-                    />
-                  ))}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+        ))}
+      </div>
     </div>
   );
 }
@@ -272,7 +185,10 @@ function SectionHeader({ label, count }: { label: string; count: number }) {
   return (
     <div className="flex items-center gap-3">
       <h2 className="text-xl font-bold text-white">{label}</h2>
-      <span className="text-xs font-bold text-[#16C47F] bg-[#16C47F]/10 border border-[#16C47F]/20 px-2 py-0.5 rounded-full">
+      <span
+        className="text-xs font-bold px-2 py-0.5 rounded-full"
+        style={{ color: "#4f7df7", background: "rgba(79,125,247,0.1)", border: "1px solid rgba(79,125,247,0.2)" }}
+      >
         {count}
       </span>
     </div>
@@ -286,7 +202,7 @@ function SeriesCard({
 }) {
   return (
     <motion.div
-      className="group cursor-pointer w-[220px]"
+      className="group cursor-pointer w-[180px]"
       onClick={onSelect}
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -296,9 +212,9 @@ function SeriesCard({
     >
       <motion.div
         layoutId={`thumb-${series.id}`}
-        className="relative aspect-video rounded-xl overflow-hidden bg-app-card transition-all duration-300"
-        style={{ borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}
-        whileHover={{ boxShadow: "0 0 0 1px rgba(22,196,127,0.5), 0 8px 32px rgba(22,196,127,0.18)" }}
+        className="relative overflow-hidden bg-app-card transition-all duration-300"
+        style={{ aspectRatio: "2/3", borderRadius: 14, border: "1px solid rgba(255,255,255,0.07)" }}
+        whileHover={{ boxShadow: "0 0 0 2px rgba(79,125,247,0.55), 0 12px 36px rgba(79,125,247,0.2)" }}
       >
         {series.thumbnail ? (
           <img
@@ -313,13 +229,14 @@ function SeriesCard({
         )}
         <button
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-[#16C47F] hover:scale-110 transition-all active:scale-95"
+          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-all active:scale-95"
+          style={{ color: "#4f7df7" }}
         >
           <IoHeart className="text-sm" />
         </button>
       </motion.div>
       <div className="mt-2 px-0.5">
-        <h3 className="text-sm font-semibold text-white group-hover:text-[#16C47F] transition-colors leading-snug">{series.title}</h3>
+        <h3 className="text-sm font-semibold text-white group-hover:text-[#4f7df7] transition-colors leading-snug">{series.title}</h3>
         <p className="text-xs text-white/40 mt-0.5">{series.instructor}</p>
         <p className="text-xs text-white/25 mt-0.5">{series.episodes.length} episodes</p>
       </div>
@@ -327,70 +244,14 @@ function SeriesCard({
   );
 }
 
-function BookCard({
-  book, index, onSelect, onRemove,
-}: {
-  book: AudioBook; index: number; onSelect: () => void; onRemove: () => void;
-}) {
-  return (
-    <motion.div
-      className="group p-3 rounded-xl w-[190px]"
-      style={{ background: "linear-gradient(145deg, #1a2820 0%, #141414 100%)", border: "1px solid rgba(255,255,255,0.05)" }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(22,196,127,0.25)"; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.05)"; }}
-      initial={{ opacity: 0, scale: 0.92 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.88 }}
-      transition={{ ...spring, delay: Math.min(index * 0.05, 0.3) }}
-      whileTap={{ scale: 0.97 }}
-    >
-      <motion.div
-        layoutId={`thumb-audio-${book.id}`}
-        className="relative aspect-square mb-3 overflow-hidden shadow-xl"
-        style={{ borderRadius: 8 }}
-        transition={spring}
-        onClick={onSelect}
-      >
-        <img
-          src={book.image}
-          alt={book.title}
-          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 cursor-pointer"
-        />
-        <div
-          onClick={onSelect}
-          className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all translate-y-1 group-hover:translate-y-0 cursor-pointer"
-        >
-          <div className="p-2 rounded-full shadow-lg hover:scale-110 transition-transform" style={{ background: "linear-gradient(135deg, #22e696 0%, #16c47f 100%)" }}>
-            <span className="text-black text-sm">▶</span>
-          </div>
-        </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          className="absolute top-2 left-2 w-7 h-7 rounded-full bg-[#16C47F]/20 flex items-center justify-center text-[#16C47F] hover:scale-110 transition-all active:scale-95"
-        >
-          <IoHeart className="text-xs" />
-        </button>
-      </motion.div>
-      <div onClick={onSelect} className="cursor-pointer">
-        <h3 className="font-bold text-white text-sm mb-0.5 leading-snug">{book.title}</h3>
-        <p className="text-xs text-white/40">{book.author}</p>
-        <span className="text-[10px] text-[#16C47F] font-bold uppercase tracking-widest mt-1 inline-block">
-          {book.episodes.length} Episodes
-        </span>
-      </div>
-    </motion.div>
-  );
-}
-
 function EpisodeRow({
-  index, title, duration, onPlay, onRemove, isVideo, hideRemove,
+  index, title, duration, onPlay, onRemove, hideRemove,
 }: {
   index: number;
   title: string;
   duration: string;
   onPlay: () => void;
   onRemove: () => void;
-  isVideo: boolean;
   hideRemove?: boolean;
 }) {
   return (
@@ -409,12 +270,12 @@ function EpisodeRow({
         <button
           onClick={onPlay}
           className="text-xs font-bold text-black px-3 py-1 rounded-lg hover:brightness-110 transition-all active:scale-95"
-          style={{ background: "linear-gradient(135deg, #22e696 0%, #16c47f 100%)" }}
+          style={{ background: "linear-gradient(135deg, #7b9df9 0%, #4f7df7 100%)" }}
         >
-          {isVideo ? "Watch" : "Listen"}
+          Watch
         </button>
         {!hideRemove && (
-          <button onClick={onRemove} className="text-[#16C47F] hover:scale-110 transition-all active:scale-95">
+          <button onClick={onRemove} className="hover:scale-110 transition-all active:scale-95" style={{ color: "#4f7df7" }}>
             <IoBookmark className="text-base" />
           </button>
         )}
@@ -484,7 +345,8 @@ function LikedVideosTab({ onSelectSeries }: { onSelectSeries: (id: string, episo
           <div key={series.id} className="space-y-2">
             <button
               onClick={() => onSelectSeries(series.id)}
-              className="text-xs font-bold text-[#16C47F] uppercase tracking-widest hover:underline"
+              className="text-xs font-bold uppercase tracking-widest hover:underline"
+              style={{ color: "#4f7df7" }}
             >
               {series.title}
             </button>
@@ -497,7 +359,6 @@ function LikedVideosTab({ onSelectSeries }: { onSelectSeries: (id: string, episo
                   duration={ep.duration}
                   onPlay={() => onSelectSeries(series.id, ep.id)}
                   onRemove={() => {}}
-                  isVideo
                   hideRemove
                 />
               ))}
@@ -510,7 +371,7 @@ function LikedVideosTab({ onSelectSeries }: { onSelectSeries: (id: string, episo
 }
 
 // ─── Page root ─────────────────────────────────────────────────────────────────
-function Favorites({ user, onLogin, onRegister, onSelectSeries, onSelectBook }: FavoritesProps) {
+function Favorites({ user, onLogin, onRegister, onSelectSeries }: FavoritesProps) {
   const [tab, setTab] = useState<"series" | "lectures" | "liked">("series");
   const [direction, setDirection] = useState(1);
 
@@ -549,12 +410,12 @@ function Favorites({ user, onLogin, onRegister, onSelectSeries, onSelectBook }: 
               <motion.div
                 layoutId="favorites-tab-pill"
                 className="absolute inset-0 rounded-lg"
-                style={{ background: "linear-gradient(135deg, #22e696 0%, #16c47f 60%, #0db36e 100%)", boxShadow: "0 2px 12px rgba(22,196,127,0.3)" }}
+                style={{ background: "linear-gradient(135deg, #7b9df9 0%, #4f7df7 60%, #3461e0 100%)", boxShadow: "0 2px 12px rgba(79,125,247,0.3)" }}
                 transition={spring}
               />
             )}
             <span className="relative z-10">
-              {t === "series" ? "Saved Series" : t === "lectures" ? "Saved Lectures" : "Liked"}
+              {t === "series" ? "Saved Series" : t === "lectures" ? "Saved Episodes" : "Liked"}
             </span>
           </button>
         ))}
@@ -568,8 +429,8 @@ function Favorites({ user, onLogin, onRegister, onSelectSeries, onSelectBook }: 
           exit={{ opacity: 0, x: direction * -20 }}
           transition={spring}
         >
-          {tab === "series" && <SavedSeriesTab onSelectSeries={onSelectSeries} onSelectBook={onSelectBook} />}
-          {tab === "lectures" && <SavedLecturesTab onSelectSeries={onSelectSeries} onSelectBook={onSelectBook} />}
+          {tab === "series" && <SavedSeriesTab onSelectSeries={onSelectSeries} />}
+          {tab === "lectures" && <SavedLecturesTab onSelectSeries={onSelectSeries} />}
           {tab === "liked" && <LikedVideosTab onSelectSeries={onSelectSeries} />}
         </motion.div>
       </AnimatePresence>

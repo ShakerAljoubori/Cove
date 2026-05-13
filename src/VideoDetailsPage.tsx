@@ -53,26 +53,6 @@ const listContainer = {
   show: { transition: { staggerChildren: 0.05, delayChildren: 0.3 } },
 };
 
-function EpisodePoster({ thumbnail, fallback, dismissed }: { thumbnail?: string; fallback?: string; dismissed: boolean }) {
-  const [episodeReady, setEpisodeReady] = useState(false);
-  useEffect(() => { setEpisodeReady(false); }, [thumbnail]);
-
-  return (
-    <div className={`absolute inset-0 z-20 pointer-events-none overflow-hidden transition-opacity duration-300 ${dismissed ? "opacity-0" : "opacity-100"}`}>
-      {fallback && (
-        <img src={fallback} alt="" className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${episodeReady ? "opacity-0" : "opacity-100"}`} />
-      )}
-      {thumbnail && (
-        <img src={thumbnail} alt="" className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${episodeReady ? "opacity-100" : "opacity-0"}`} onLoad={() => setEpisodeReady(true)} onError={() => setEpisodeReady(false)} />
-      )}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-20 h-20 bg-[#16C47F] rounded-full flex items-center justify-center shadow-2xl shadow-[#16C47F]/30">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" className="text-black ml-1"><path d="M8 5v14l11-7z" /></svg>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const NowPlayingBars = () => (
   <div className="flex items-end gap-[2.5px] shrink-0" style={{ height: 13, width: 13 }}>
@@ -104,7 +84,6 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
   const [seekTo, setSeekTo] = useState<number | undefined>(initialTimestamp);
   const [durations, setDurations] = useState<{ [key: number]: string }>({});
   const [shouldAutoPlay, setShouldAutoPlay] = useState(!!initialEpisodeId);
-  const [episodePosterDismissed, setEpisodePosterDismissed] = useState(false);
 
   const [comments, setComments] = useState<CommentType[]>([]);
   const [commentText, setCommentText] = useState("");
@@ -134,7 +113,6 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
 
   const activeEpisodeRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { setEpisodePosterDismissed(shouldAutoPlay); }, [currentEpisode.id, shouldAutoPlay]);
 
   const { isSeriesFavorite, toggleSeries, isVideoEpisodeSaved, toggleVideoEpisode } = useFavorites();
   const { saveProgress } = useWatchProgress();
@@ -255,7 +233,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
         gsap.timeline()
           .to(card, { scale: 1.02, duration: 0.15, ease: "power2.out" })
           .to(card, { scale: 1, duration: 0.35, ease: "back.out(2.5)" })
-          .fromTo(body, { color: "rgba(22,196,127,1)" }, { color: "rgba(255,255,255,0.65)", duration: 1, ease: "power2.out" }, "<");
+          .fromTo(body, { color: "rgba(79,125,247,1)" }, { color: "rgba(255,255,255,0.65)", duration: 1, ease: "power2.out" }, "<");
       }
     }
   }, [comments]);
@@ -385,7 +363,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
     const isReply     = !!parentId;
 
     return (
-      <div key={c._id} data-comment-id={c._id} className={`flex gap-3 group${isReply ? " relative pl-4 border-l-2 border-[#16C47F]/15" : ""}`}>
+      <div key={c._id} data-comment-id={c._id} className={`flex gap-3 group${isReply ? " relative pl-4 border-l-2 border-[#4f7df7]/15" : ""}`}>
         {/* Avatar */}
         {user?.id === c.userId && user?.avatar ? (
           <div
@@ -397,7 +375,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
         ) : (
           <div
             className="ca w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-black"
-            style={{ background: "linear-gradient(135deg, #22e696, #16c47f)", minWidth: isReply ? 32 : 36, minHeight: isReply ? 32 : 36, width: isReply ? 32 : 36, height: isReply ? 32 : 36 }}
+            style={{ background: "linear-gradient(135deg, #7b9df9, #4f7df7)", minWidth: isReply ? 32 : 36, minHeight: isReply ? 32 : 36, width: isReply ? 32 : 36, height: isReply ? 32 : 36 }}
           >
             {c.userName[0].toUpperCase()}
           </div>
@@ -572,14 +550,12 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                       title={`${series.title} — ${currentEpisode.title}`}
                       onClose={onBack}
                       initialTimestamp={seekTo}
-                      poster={series.thumbnail}
+                      poster={series.backdrop ?? series.thumbnail}
                       autoPlay={shouldAutoPlay}
-                      onPlayStart={() => setEpisodePosterDismissed(true)}
                       onProgress={(timestamp, duration, snapshot) =>
                         saveProgress(series.id, currentEpisode.id, timestamp, duration, snapshot)
                       }
                     />
-                    <EpisodePoster thumbnail={currentEpisode.thumbnail} fallback={series.thumbnail} dismissed={episodePosterDismissed} />
                   </motion.div>
                 </AnimatePresence>
               </motion.div>
@@ -591,7 +567,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                 <motion.div variants={staggerItem}>
                   <h1 className="text-2xl md:text-3xl font-bold text-text-main leading-tight">{series.title}</h1>
                   <div className="mt-1.5 flex gap-3 text-xs font-medium uppercase tracking-widest">
-                    <span style={{ color: "rgba(22,196,127,0.8)" }}>{series.category}</span>
+                    <span style={{ color: "rgba(79,125,247,0.8)" }}>{series.category}</span>
                     <span className="text-white/20">|</span>
                     <span className="text-text-muted">{series.instructor}</span>
                   </div>
@@ -603,7 +579,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                   <button
                     onClick={async () => { if (!user || pendingSeries) return; setPendingSeries(true); await toggleSeries(series.id); setPendingSeries(false); }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:scale-105 active:scale-95 ${
-                      seriesSaved ? "bg-[#16C47F]/10 border-[#16C47F]/30 text-[#16C47F]" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
+                      seriesSaved ? "bg-[#4f7df7]/10 border-[#4f7df7]/30 text-[#4f7df7]" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
                     } ${!user ? "opacity-40 cursor-not-allowed" : ""} ${pendingSeries ? "opacity-50 pointer-events-none" : ""}`}
                   >
                     {seriesSaved ? <IoHeart className="text-base" /> : <IoHeartOutline className="text-base" />}
@@ -613,7 +589,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                   <button
                     onClick={async () => { if (!user || pendingEpisode) return; setPendingEpisode(true); await toggleVideoEpisode(series.id, currentEpisode.id); setPendingEpisode(false); }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:scale-105 active:scale-95 ${
-                      episodeBookmarked ? "bg-[#f5c451]/10 border-[#f5c451]/30 text-[#f5c451]" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
+                      episodeBookmarked ? "bg-[#e8997a]/10 border-[#e8997a]/30 text-[#e8997a]" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
                     } ${!user ? "opacity-40 cursor-not-allowed" : ""} ${pendingEpisode ? "opacity-50 pointer-events-none" : ""}`}
                   >
                     {episodeBookmarked ? <IoBookmark className="text-base" /> : <IoBookmarkOutline className="text-base" />}
@@ -692,8 +668,8 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                   <motion.div variants={staggerItem} className="mt-4">
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-1.5">
-                        <IoThumbsUp className="text-[10px] text-[#16C47F]" />
-                        <span className="text-xs font-semibold text-[#16C47F] tabular-nums">{reactionCounts.likes}</span>
+                        <IoThumbsUp className="text-[10px] text-[#4f7df7]" />
+                        <span className="text-xs font-semibold text-[#4f7df7] tabular-nums">{reactionCounts.likes}</span>
                       </div>
                       <span className="text-[10px] text-white/25 tabular-nums">
                         {Math.round((reactionCounts.likes / (reactionCounts.likes + reactionCounts.dislikes)) * 100)}% liked
@@ -706,7 +682,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                     <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
                       <motion.div
                         className="h-full rounded-full"
-                        style={{ background: "linear-gradient(90deg, #16c47f, #22e696)" }}
+                        style={{ background: "linear-gradient(90deg, #4f7df7, #7b9df9)" }}
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.round((reactionCounts.likes / (reactionCounts.likes + reactionCounts.dislikes)) * 100)}%` }}
                         transition={{ duration: 0.7, ease: "easeOut" }}
@@ -732,7 +708,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                     <div className="flex gap-3 mb-7">
                       <div
                         className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-sm font-bold text-black"
-                        style={{ background: "linear-gradient(135deg, #22e696, #16c47f)" }}
+                        style={{ background: "linear-gradient(135deg, #7b9df9, #4f7df7)" }}
                       >
                         {user.name[0].toUpperCase()}
                       </div>
@@ -758,7 +734,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                         {commentText.length > 0 && (
                           <span
                             className="text-right text-[10px] tabular-nums pr-1 transition-colors"
-                            style={{ color: commentText.length > 900 ? "#f5c451" : "rgba(255,255,255,0.2)" }}
+                            style={{ color: commentText.length > 900 ? "#e8997a" : "rgba(255,255,255,0.2)" }}
                           >
                             {commentText.length}/1000
                           </span>
@@ -804,7 +780,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                               <div className="flex gap-2.5 ml-11 pt-1">
                                 <div
                                   className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-black mt-1"
-                                  style={{ background: "linear-gradient(135deg, #22e696, #16c47f)" }}
+                                  style={{ background: "linear-gradient(135deg, #7b9df9, #4f7df7)" }}
                                 >
                                   {user.name[0].toUpperCase()}
                                 </div>
@@ -895,8 +871,8 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
               <motion.div
                 className="rounded-2xl flex flex-col overflow-hidden"
                 style={{
-                  background: "linear-gradient(180deg, #162318 0%, #111111 100%)",
-                  border: "1px solid rgba(22,196,127,0.14)",
+                  background: "linear-gradient(180deg, #101428 0%, #111111 100%)",
+                  border: "1px solid rgba(79,125,247,0.14)",
                   maxHeight: "52vh",
                 }}
                 initial={{ opacity: 0, y: 24 }}
@@ -905,7 +881,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
               >
                 <div className="p-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                   <h2 className="text-base font-bold">Course Content</h2>
-                  <p className="text-xs mt-0.5 font-medium" style={{ color: "rgba(245,196,81,0.7)" }}>
+                  <p className="text-xs mt-0.5 font-medium" style={{ color: "rgba(232,153,122,0.7)" }}>
                     {series.episodes.length} episodes
                   </p>
                 </div>
@@ -948,7 +924,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                               <span
                                 role="button"
                                 onClick={(e) => { e.stopPropagation(); toggleVideoEpisode(series.id, ep.id); }}
-                                className={`transition-all hover:scale-110 active:scale-95 cursor-pointer ${isBookmarked ? "text-[#16C47F]" : "text-white/30 hover:text-white/70"}`}
+                                className={`transition-all hover:scale-110 active:scale-95 cursor-pointer ${isBookmarked ? "text-[#4f7df7]" : "text-white/30 hover:text-white/70"}`}
                               >
                                 {isBookmarked ? <IoBookmark className="text-xs" /> : <IoBookmarkOutline className="text-xs" />}
                               </span>
@@ -965,7 +941,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
               {suggestedSeries.length > 0 && (
                 <motion.div
                   className="rounded-2xl overflow-hidden"
-                  style={{ background: "linear-gradient(180deg, #162318 0%, #111111 100%)", border: "1px solid rgba(22,196,127,0.14)" }}
+                  style={{ background: "linear-gradient(180deg, #101428 0%, #111111 100%)", border: "1px solid rgba(79,125,247,0.14)" }}
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.32, type: "spring", stiffness: 300, damping: 30 }}

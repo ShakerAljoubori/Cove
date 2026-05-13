@@ -39,7 +39,7 @@ const WatchProgressContext = createContext<WatchProgressContextType | undefined>
 
 export const WatchProgressProvider = ({ children }: { children: React.ReactNode }) => {
   const { userId } = useAuth();
-  const lsKey = userId ? `ds_watch_progress_${userId}` : "ds_watch_progress_guest";
+  const lsKey = userId ? `cove_watch_progress_${userId}` : "cove_watch_progress_guest";
 
   const [allProgress, setAllProgress] = useState<Record<string, ProgressEntry>>(() =>
     loadFromStorage(lsKey)
@@ -48,7 +48,7 @@ export const WatchProgressProvider = ({ children }: { children: React.ReactNode 
   // When userId changes (login/logout/switch), load the right data source
   useEffect(() => {
     if (!userId) {
-      setAllProgress(loadFromStorage("ds_watch_progress_guest"));
+      setAllProgress(loadFromStorage("cove_watch_progress_guest"));
       return;
     }
 

@@ -5,13 +5,9 @@ import gsap from "gsap";
 import Navbar from "./Navbar";
 import Hero from "./Hero";
 import ContinueWatching from "./ContinueWatching";
-import ContinueListening from "./ContinueListening";
 import SeriesBrowse from "./SeriesBrowse";
 import Sidebar from "./Sidebar";
 import VideoDetailsPage from "./VideoDetailsPage";
-import AudioBooksPage from "./AudioBooksPage";
-import AudioPlayerPage from "./AudioPlayerPage";
-import AudioStickyPlayer from "./AudioStickyPlayer";
 import Login from "./Login";
 import Register from "./Register";
 import Favorites from "./Favorites";
@@ -19,10 +15,10 @@ import SettingsPage from "./SettingsPage";
 import SearchResultsPage from "./SearchResultsPage";
 import { useFavorites } from "./FavoritesContext";
 import { useAuth } from "./AuthContext";
-import { allSeries, allAudioBooks } from "./data";
-import type { Series, AudioBook } from "./data";
+import { allSeries } from "./data";
+import type { Series } from "./data";
 
-type Page = "home" | "video" | "audiobooks" | "login" | "register" | "favorites" | "settings" | "search";
+type Page = "home" | "video" | "login" | "register" | "favorites" | "settings" | "search";
 
 interface User {
   id: string;
@@ -34,31 +30,21 @@ interface User {
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedSeries, setSelectedSeries] = useState<Series | null>(null);
-  const [selectedAudioBook, setSelectedAudioBook] = useState<AudioBook | null>(null);
   const [initialEpisodeId, setInitialEpisodeId] = useState<number | undefined>();
   const [initialTimestamp, setInitialTimestamp] = useState<number | undefined>();
-  const [initialAudioEpisodeId, setInitialAudioEpisodeId] = useState<number | undefined>();
-  const [initialAudioTimestamp, setInitialAudioTimestamp] = useState<number | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [signedOutToast, setSignedOutToast] = useState(false);
 
-  // Tracks what page we came FROM so the home page knows whether to
-  // start blurred (returning from video) or faded (fresh load / other page).
   const prevPageRef = useRef<Page>("home");
-
-  // Saved scroll offset so we can restore position after closing the video overlay.
   const savedScrollRef = useRef(0);
-
-  // GSAP page transition — animates the content wrapper directly
   const contentRef = useRef<HTMLDivElement>(null);
   const isTransitioningRef = useRef(false);
 
   const { fetchFavorites, clearFavorites } = useFavorites();
   const { setUserId } = useAuth();
 
-  // On mount: restore session + load favorites if token exists
   useEffect(() => {
     const checkLoggedIn = async () => {
       const token = localStorage.getItem("token");
@@ -88,10 +74,6 @@ function App() {
   const handleOpenVideo = (seriesId: string, episodeId?: number, timestamp?: number) => {
     const series = allSeries.find((s) => s.id === seriesId);
     if (series) {
-      // Lock body scroll SYNCHRONOUSLY — before React re-renders and before
-      // Framer Motion measures the card's getBoundingClientRect().
-      // Using position:fixed + top:-scrollY preserves the visual scroll offset
-      // so the card's viewport position stays identical after locking.
       savedScrollRef.current = window.scrollY;
       document.body.style.overflow = "hidden";
       document.body.style.position = "fixed";
@@ -104,32 +86,6 @@ function App() {
       setInitialTimestamp(timestamp);
       setCurrentPage("video");
     }
-  };
-
-  const handleOpenBook = (bookId: string, episodeId?: number, timestamp?: number) => {
-    const book = allAudioBooks.find((b) => b.id === bookId);
-    if (book) {
-      savedScrollRef.current = window.scrollY;
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${savedScrollRef.current}px`;
-      document.body.style.width = "100%";
-
-      setSelectedAudioBook(book);
-      setInitialAudioEpisodeId(episodeId);
-      setInitialAudioTimestamp(timestamp);
-    }
-  };
-
-  const handleCloseBook = () => {
-    document.body.style.overflow = "";
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.width = "";
-    window.scrollTo(0, savedScrollRef.current);
-    setSelectedAudioBook(null);
-    setInitialAudioEpisodeId(undefined);
-    setInitialAudioTimestamp(undefined);
   };
 
   const runPageTransition = (
@@ -151,16 +107,8 @@ function App() {
   };
 
   const navigateTo = (page: Page) => {
-    if (page === currentPage && !selectedAudioBook) return;
+    if (page === currentPage) return;
 
-    // Audio overlay close — let Framer Motion morph play, skip GSAP curtain.
-    if (selectedAudioBook) {
-      handleCloseBook();
-      if (page === currentPage) return;
-      // Fall through to GSAP for the page navigation.
-    }
-
-    // Video close: let Framer Motion layoutId morph play unobstructed — skip curtain.
     if (currentPage === "video") {
       document.body.style.overflow = "";
       document.body.style.position = "";
@@ -169,12 +117,9 @@ function App() {
       window.scrollTo(0, savedScrollRef.current);
       prevPageRef.current = "video";
       setCurrentPage(page);
-      setSelectedAudioBook(null);
       setSelectedSeries(null);
       setInitialEpisodeId(undefined);
       setInitialTimestamp(undefined);
-      setInitialAudioEpisodeId(undefined);
-      setInitialAudioTimestamp(undefined);
       return;
     }
 
@@ -185,7 +130,6 @@ function App() {
     const toSettings = page === "settings";
     const fromSettings = currentPage === "settings";
 
-    // Settings: horizontal slide (right-panel feel). Default: vertical fade.
     const exitVars = toSettings
       ? { opacity: 0, x: -24, duration: 0.2, ease: "power2.in" }
       : fromSettings
@@ -204,12 +148,9 @@ function App() {
 
     runPageTransition(exitVars, enterFrom, enterTo, () => {
       setCurrentPage(page);
-      setSelectedAudioBook(null);
       setSelectedSeries(null);
       setInitialEpisodeId(undefined);
       setInitialTimestamp(undefined);
-      setInitialAudioEpisodeId(undefined);
-      setInitialAudioTimestamp(undefined);
       window.scrollTo(0, 0);
     });
   };
@@ -219,9 +160,7 @@ function App() {
     navigateTo("search");
   };
 
-  const handleUserUpdate = (updated: User) => {
-    setUser(updated);
-  };
+  const handleUserUpdate = (updated: User) => setUser(updated);
 
   const handleDeleteAccount = () => {
     localStorage.removeItem("token");
@@ -244,7 +183,6 @@ function App() {
   if (loading) return <div className="min-h-screen bg-app-bg" />;
 
   return (
-    // LayoutGroup coordinates layoutId animations across separate AnimatePresence trees
     <LayoutGroup>
       <div className="min-h-screen bg-app-bg text-white relative">
         <Sidebar
@@ -256,7 +194,7 @@ function App() {
         />
 
         <div className="pl-0 md:pl-20">
-          <Navbar onSelectSeries={handleOpenVideo} onSelectBook={handleOpenBook} onShowMore={handleShowMore} />
+          <Navbar onSelectSeries={handleOpenVideo} onShowMore={handleShowMore} />
 
           <main className={currentPage === "login" || currentPage === "register" ? "" : "pb-24"}>
             <div ref={contentRef}>
@@ -264,7 +202,6 @@ function App() {
                 <div className="pt-4">
                   <Hero onPlay={handleOpenVideo} user={user} />
                   <ContinueWatching onSelectVideo={handleOpenVideo} />
-                  <ContinueListening onSelectBook={handleOpenBook} />
                   <SeriesBrowse onSelectSeries={handleOpenVideo} user={user} />
                 </div>
               )}
@@ -317,15 +254,6 @@ function App() {
                   onLogin={() => setCurrentPage("login")}
                   onRegister={() => setCurrentPage("register")}
                   onSelectSeries={(seriesId, episodeId) => handleOpenVideo(seriesId, episodeId)}
-                  onSelectBook={(book, episodeId) => handleOpenBook(book.id, episodeId)}
-                />
-              )}
-
-              {currentPage === "audiobooks" && (
-                <AudioBooksPage
-                  onBack={() => navigateTo("home")}
-                  onSelectBook={(book) => handleOpenBook(book.id)}
-                  user={user}
                 />
               )}
 
@@ -342,7 +270,6 @@ function App() {
                 <SearchResultsPage
                   query={searchQuery}
                   onSelectSeries={handleOpenVideo}
-                  onSelectBook={(bookId) => handleOpenBook(bookId)}
                   onBack={() => navigateTo("home")}
                 />
               )}
@@ -350,8 +277,6 @@ function App() {
           </main>
         </div>
 
-        {/* Video overlay — separate AnimatePresence so it layers over the home page
-            while the home cards' layoutIds are still in the DOM for the morph origin */}
         <AnimatePresence>
           {currentPage === "video" && selectedSeries && (
             <VideoDetailsPage
@@ -373,31 +298,14 @@ function App() {
           )}
         </AnimatePresence>
 
-        {/* Audio overlay — same pattern as video, fixed inset-0 over whatever page is current */}
-        <AnimatePresence>
-          {selectedAudioBook && (
-            <AudioPlayerPage
-              key={selectedAudioBook.id}
-              book={selectedAudioBook}
-              onBack={handleCloseBook}
-              user={user}
-              initialEpisodeId={initialAudioEpisodeId}
-              initialTimestamp={initialAudioTimestamp}
-            />
-          )}
-        </AnimatePresence>
-
-        <AudioStickyPlayer />
-
-        {/* Sign-out confirmation toast */}
         <AnimatePresence>
           {signedOutToast && (
             <motion.div
               className="fixed bottom-10 left-0 right-0 mx-auto w-fit z-[300] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl pointer-events-none"
               style={{
-                background: "linear-gradient(145deg, #1a2e22 0%, #0f1a12 100%)",
-                border: "1px solid rgba(22, 196, 127, 0.35)",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(22,196,127,0.1)",
+                background: "linear-gradient(145deg, #0f1220 0%, #080e1c 100%)",
+                border: "1px solid rgba(79, 125, 247, 0.35)",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(79,125,247,0.1)",
               }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -406,9 +314,9 @@ function App() {
             >
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(22,196,127,0.15)", border: "1px solid #16c47f" }}
+                style={{ background: "rgba(79,125,247,0.15)", border: "1px solid #4f7df7" }}
               >
-                <span style={{ color: "#16c47f", fontSize: "11px", fontWeight: 900 }}>✓</span>
+                <span style={{ color: "#4f7df7", fontSize: "11px", fontWeight: 900 }}>✓</span>
               </div>
               <div>
                 <p className="text-sm font-bold text-white leading-none mb-0.5">Signed out</p>

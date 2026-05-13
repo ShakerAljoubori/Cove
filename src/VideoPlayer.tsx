@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useAudioPlayer } from "./AudioPlayerContext";
 import { formatTime } from "./utils";
 
 interface VideoPlayerProps {
@@ -56,19 +55,16 @@ const VideoPlayer = ({ url, title, onClose, initialTimestamp, onProgress, poster
   // FIX: Using ReturnType<typeof setTimeout> removes the NodeJS namespace error
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { isPlaying: audioIsPlaying, togglePlay: pauseAudio } = useAudioPlayer();
-
   const togglePlay = useCallback(() => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        if (audioIsPlaying) pauseAudio();
         videoRef.current.play();
       }
       setIsPlaying(!isPlaying);
     }
-  }, [isPlaying, audioIsPlaying, pauseAudio]);
+  }, [isPlaying]);
 
   const captureSnapshot = (): string | undefined => {
     const video = videoRef.current;
@@ -268,7 +264,7 @@ const VideoPlayer = ({ url, title, onClose, initialTimestamp, onProgress, poster
           <div className="space-y-1">
             <h3 className="text-white font-bold text-lg drop-shadow-lg">{title}</h3>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#16C47F] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#4f7df7] animate-pulse" />
               <span className="text-[10px] text-white/60 uppercase tracking-widest font-medium">Now Streaming</span>
             </div>
           </div>
@@ -279,7 +275,7 @@ const VideoPlayer = ({ url, title, onClose, initialTimestamp, onProgress, poster
 
         {!isBuffering && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <button onClick={togglePlay} className="w-20 h-20 rounded-full flex items-center justify-center text-black transform transition-all hover:scale-110 active:scale-95" style={{ background: "linear-gradient(135deg, #22e696 0%, #16c47f 60%, #0db36e 100%)", boxShadow: "0 0 40px rgba(22,196,127,0.45)" }}>
+            <button onClick={togglePlay} className="w-20 h-20 rounded-full flex items-center justify-center text-black transform transition-all hover:scale-110 active:scale-95" style={{ background: "linear-gradient(135deg, #7b9df9 0%, #4f7df7 60%, #3461e0 100%)", boxShadow: "0 0 40px rgba(79,125,247,0.45)" }}>
               {isPlaying ? (
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>
               ) : (
@@ -293,7 +289,7 @@ const VideoPlayer = ({ url, title, onClose, initialTimestamp, onProgress, poster
           <div className="relative group/progress h-1.5 flex items-center">
             <input type="range" min="0" max="100" value={progress} onChange={handleProgressChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
             <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-100 relative" style={{ width: `${progress}%`, background: "linear-gradient(90deg, #16c47f 0%, #f5c451 100%)" }}>
+              <div className="h-full rounded-full transition-all duration-100 relative" style={{ width: `${progress}%`, background: "linear-gradient(90deg, #4f7df7 0%, #e8997a 100%)" }}>
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg scale-0 group-hover/progress:scale-100 transition-transform" />
               </div>
             </div>
@@ -305,7 +301,7 @@ const VideoPlayer = ({ url, title, onClose, initialTimestamp, onProgress, poster
                 <SeekBackIcon />
                 <span className="text-[8px] font-bold leading-none tracking-wide">5s</span>
               </button>
-              <button onClick={togglePlay} className="text-white hover:text-[#16C47F] transition-all">
+              <button onClick={togglePlay} className="text-white hover:text-[#4f7df7] transition-all">
                 {isPlaying ? (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>
                 ) : (
@@ -323,14 +319,14 @@ const VideoPlayer = ({ url, title, onClose, initialTimestamp, onProgress, poster
                 <input
                   type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange}
                   className="w-16 h-1 rounded-full appearance-none cursor-pointer accent-white"
-                  style={{ background: `linear-gradient(to right, #16c47f 0%, #f5c451 ${Math.max(volume * 100, volume > 0 ? 3 : 0)}%, rgba(255, 255, 255, 0.2) ${Math.max(volume * 100, volume > 0 ? 3 : 0)}%)` }}
+                  style={{ background: `linear-gradient(to right, #4f7df7 0%, #e8997a ${Math.max(volume * 100, volume > 0 ? 3 : 0)}%, rgba(255, 255, 255, 0.2) ${Math.max(volume * 100, volume > 0 ? 3 : 0)}%)` }}
                 />
               </div>
               <span className="text-sm font-mono font-bold text-white/90 tabular-nums" style={{ textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}>
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
             </div>
-            <button onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }} className="text-white/60 hover:text-[#16C47F] transition-all">
+            <button onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }} className="text-white/60 hover:text-[#4f7df7] transition-all">
               <FullscreenIcon />
             </button>
           </div>
@@ -340,7 +336,7 @@ const VideoPlayer = ({ url, title, onClose, initialTimestamp, onProgress, poster
       {/* Spinner rendered after controls overlay so it stacks on top */}
       {isBuffering && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-          <div className="w-11 h-11 rounded-full border-2 border-white/20 border-t-[#16c47f] animate-spin" />
+          <div className="w-11 h-11 rounded-full border-2 border-white/20 border-t-[#4f7df7] animate-spin" />
         </div>
       )}
     </div>

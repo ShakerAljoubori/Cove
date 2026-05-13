@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GrPlay } from "react-icons/gr";
-import { IoHeadsetOutline, IoHeartOutline } from "react-icons/io5";
+import { IoHeartOutline } from "react-icons/io5";
 import { HiOutlineUserCircle } from "react-icons/hi";
-import { useAudioPlayer } from "./AudioPlayerContext";
+import CoveLogo from "./CoveLogo";
 
 interface SidebarProps {
-  onNavigate: (page: "home" | "audiobooks" | "login" | "register" | "favorites" | "settings") => void;
+  onNavigate: (page: "home" | "login" | "register" | "favorites" | "settings") => void;
   currentPage: string;
   user: { name: string; email: string } | null;
   onLogout: () => void;
@@ -14,12 +14,12 @@ interface SidebarProps {
 }
 
 const NAV_ACTIVE_STYLE = {
-  background: "linear-gradient(135deg, #22e696 0%, #16c47f 60%, #0db36e 100%)",
+  background: "linear-gradient(135deg, #7b9df9 0%, #4f7df7 60%, #e8997a 100%)",
 };
 
 const POPUP_STYLE = {
-  background: "linear-gradient(145deg, #1a2e22 0%, #111111 100%)",
-  border: "1px solid rgba(22, 196, 127, 0.18)",
+  background: "linear-gradient(145deg, #0f1220 0%, #111111 100%)",
+  border: "1px solid rgba(79, 125, 247, 0.18)",
 };
 
 const POPUP_MOTION = {
@@ -125,7 +125,6 @@ function Sidebar({ onNavigate, currentPage, user, onLogout, avatar }: SidebarPro
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const { currentBook, currentEpisode } = useAudioPlayer();
   const close = () => setShowProfileMenu(false);
 
   useEffect(() => {
@@ -141,26 +140,20 @@ function Sidebar({ onNavigate, currentPage, user, onLogout, avatar }: SidebarPro
 
   return (
     <>
-      {/* ── Desktop sidebar (hidden on mobile) ── */}
+      {/* ── Desktop sidebar ── */}
       <aside
         className="hidden md:flex fixed left-0 top-0 h-screen w-20 flex-col items-center py-6 z-60"
         style={{
-          background: "linear-gradient(180deg, #152b1f 0%, #101f16 35%, #0d1710 65%, #080808 100%)",
-          borderRight: "1px solid rgba(22, 196, 127, 0.18)",
+          background: "linear-gradient(180deg, #0c1228 0%, #091020 35%, #080b18 65%, #080b18 100%)",
+          borderRight: "1px solid rgba(79, 125, 247, 0.18)",
         }}
       >
-        <div className="font-black text-2xl mb-12">
+        <div className="mb-12">
           <button
             onClick={() => onNavigate("home")}
             className="cursor-pointer hover:opacity-80 transition-opacity outline-none"
-            style={{
-              background: "linear-gradient(135deg, #16c47f 0%, #f5c451 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
           >
-            DS
+            <CoveLogo size={36} />
           </button>
         </div>
 
@@ -169,7 +162,7 @@ function Sidebar({ onNavigate, currentPage, user, onLogout, avatar }: SidebarPro
             onClick={() => onNavigate("home")}
             className="p-3 rounded-2xl"
             style={currentPage === "home"
-              ? { ...NAV_ACTIVE_STYLE, color: "#000", boxShadow: "0 4px 20px rgba(22, 196, 127, 0.35)" }
+              ? { ...NAV_ACTIVE_STYLE, color: "#000", boxShadow: "0 4px 20px rgba(79, 125, 247, 0.35)" }
               : { color: "rgba(255,255,255,0.4)" }}
             onMouseEnter={e => { if (currentPage !== "home") (e.currentTarget as HTMLElement).style.color = "#fff"; }}
             onMouseLeave={e => { if (currentPage !== "home") (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)"; }}
@@ -181,25 +174,10 @@ function Sidebar({ onNavigate, currentPage, user, onLogout, avatar }: SidebarPro
           </motion.button>
 
           <motion.button
-            onClick={() => onNavigate("audiobooks")}
-            className="p-3 rounded-2xl"
-            style={currentPage === "audiobooks"
-              ? { ...NAV_ACTIVE_STYLE, color: "#000", boxShadow: "0 4px 20px rgba(22, 196, 127, 0.35)" }
-              : { color: "rgba(255,255,255,0.4)" }}
-            onMouseEnter={e => { if (currentPage !== "audiobooks") (e.currentTarget as HTMLElement).style.color = "#fff"; }}
-            onMouseLeave={e => { if (currentPage !== "audiobooks") (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)"; }}
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.8, rotate: 12 }}
-            transition={{ type: "spring", stiffness: 420, damping: 20 }}
-          >
-            <IoHeadsetOutline className="text-xl" />
-          </motion.button>
-
-          <motion.button
             onClick={() => onNavigate("favorites")}
             className="p-3 rounded-2xl"
             style={currentPage === "favorites"
-              ? { ...NAV_ACTIVE_STYLE, color: "#000", boxShadow: "0 4px 20px rgba(22, 196, 127, 0.35)" }
+              ? { ...NAV_ACTIVE_STYLE, color: "#000", boxShadow: "0 4px 20px rgba(79, 125, 247, 0.35)" }
               : { color: "rgba(255,255,255,0.4)" }}
             onMouseEnter={e => { if (currentPage !== "favorites") (e.currentTarget as HTMLElement).style.color = "#fff"; }}
             onMouseLeave={e => { if (currentPage !== "favorites") (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)"; }}
@@ -212,7 +190,6 @@ function Sidebar({ onNavigate, currentPage, user, onLogout, avatar }: SidebarPro
         </nav>
 
         <div className="relative" ref={menuRef}>
-          {/* Desktop popup — inlined so AnimatePresence is never remounted */}
           <div style={{ position: "absolute", bottom: "0", left: "64px" }}>
             <AnimatePresence>
               {showProfileMenu && (
@@ -229,17 +206,17 @@ function Sidebar({ onNavigate, currentPage, user, onLogout, avatar }: SidebarPro
 
           <motion.div
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className={`${currentBook || currentEpisode ? "mb-24" : "mb-4"} w-10 h-10 rounded-full flex items-center justify-center cursor-pointer font-bold overflow-hidden`}
+            className="mb-4 w-10 h-10 rounded-full flex items-center justify-center cursor-pointer font-bold overflow-hidden"
             style={showProfileMenu
-              ? { background: "rgba(22,196,127,0.2)", border: "1px solid #16c47f", color: "#16c47f" }
+              ? { background: "rgba(79,125,247,0.2)", border: "1px solid #4f7df7", color: "#4f7df7" }
               : avatar
-                ? { border: "1px solid rgba(245,196,81,0.35)" }
-                : { background: "rgba(245,196,81,0.15)", border: "1px solid rgba(245,196,81,0.35)", color: "#f5c451" }}
+                ? { border: "1px solid rgba(232,153,122,0.35)" }
+                : { background: "rgba(232,153,122,0.15)", border: "1px solid rgba(232,153,122,0.35)", color: "#e8997a" }}
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.82, rotate: 12 }}
             animate={showProfileMenu
-              ? { boxShadow: "0 0 0 3px rgba(22,196,127,0.25), 0 0 18px rgba(22,196,127,0.2)" }
-              : { boxShadow: "0 0 0 0px rgba(22,196,127,0)" }}
+              ? { boxShadow: "0 0 0 3px rgba(79,125,247,0.25), 0 0 18px rgba(79,125,247,0.2)" }
+              : { boxShadow: "0 0 0 0px rgba(79,125,247,0)" }}
             transition={{ type: "spring", stiffness: 420, damping: 22 }}
           >
             {avatar
@@ -249,43 +226,33 @@ function Sidebar({ onNavigate, currentPage, user, onLogout, avatar }: SidebarPro
         </div>
       </aside>
 
-      {/* ── Mobile bottom nav (hidden on md+) ── */}
+      {/* ── Mobile bottom nav ── */}
       <nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-[110] flex items-center justify-around px-4 h-16"
         style={{
-          background: "linear-gradient(180deg, #101f16 0%, #080808 100%)",
-          borderTop: "1px solid rgba(22, 196, 127, 0.18)",
+          background: "linear-gradient(180deg, #091020 0%, #080b18 100%)",
+          borderTop: "1px solid rgba(79, 125, 247, 0.18)",
         }}
       >
         <button
           onClick={() => onNavigate("home")}
           className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all"
-          style={currentPage === "home" ? { color: "#16c47f" } : { color: "rgba(255,255,255,0.4)" }}
+          style={currentPage === "home" ? { color: "#4f7df7" } : { color: "rgba(255,255,255,0.4)" }}
         >
           <GrPlay className="text-xl" />
           <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
         </button>
 
         <button
-          onClick={() => onNavigate("audiobooks")}
-          className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all"
-          style={currentPage === "audiobooks" ? { color: "#16c47f" } : { color: "rgba(255,255,255,0.4)" }}
-        >
-          <IoHeadsetOutline className="text-xl" />
-          <span className="text-[9px] font-bold uppercase tracking-wider">Audio</span>
-        </button>
-
-        <button
           onClick={() => onNavigate("favorites")}
           className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all"
-          style={currentPage === "favorites" ? { color: "#16c47f" } : { color: "rgba(255,255,255,0.4)" }}
+          style={currentPage === "favorites" ? { color: "#4f7df7" } : { color: "rgba(255,255,255,0.4)" }}
         >
           <IoHeartOutline className="text-xl" />
           <span className="text-[9px] font-bold uppercase tracking-wider">Saved</span>
         </button>
 
         <div className="relative" ref={mobileMenuRef}>
-          {/* Mobile popup — inlined so AnimatePresence is never remounted */}
           <div className="absolute bottom-full right-0 mb-2">
             <AnimatePresence>
               {showProfileMenu && (
@@ -302,7 +269,7 @@ function Sidebar({ onNavigate, currentPage, user, onLogout, avatar }: SidebarPro
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all font-bold"
-            style={showProfileMenu ? { color: "#16c47f" } : { color: "rgba(255,255,255,0.4)" }}
+            style={showProfileMenu ? { color: "#4f7df7" } : { color: "rgba(255,255,255,0.4)" }}
           >
             <HiOutlineUserCircle className="text-xl" />
             <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>

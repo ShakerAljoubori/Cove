@@ -20,8 +20,8 @@ interface SettingsPageProps {
 }
 
 const CARD_STYLE = {
-  background: "linear-gradient(145deg, #1a2e22 0%, #111111 100%)",
-  border: "1px solid rgba(22, 196, 127, 0.18)",
+  background: "linear-gradient(145deg, #0f1220 0%, #111111 100%)",
+  border: "1px solid rgba(79, 125, 247, 0.18)",
 };
 
 const DANGER_CARD_STYLE = {
@@ -30,13 +30,13 @@ const DANGER_CARD_STYLE = {
 };
 
 const INPUT_CLASS =
-  "bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-green-500/50 transition-colors w-full";
+  "bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-500/50 transition-colors w-full";
 
 function StatusBanner({ type, msg }: { type: "success" | "error"; msg: string }) {
   return (
     <motion.div
       className={`text-sm px-4 py-2.5 rounded-xl font-medium ${
-        type === "success" ? "bg-green-500/15 text-green-400" : "bg-red-500/15 text-red-400"
+        type === "success" ? "bg-green-500/15 text-cyan-400" : "bg-red-500/15 text-red-400"
       }`}
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
@@ -325,7 +325,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
           <h1
             className="text-2xl font-black"
             style={{
-              background: "linear-gradient(135deg, #16c47f 0%, #f5c451 100%)",
+              background: "linear-gradient(135deg, #7b9df9 0%, #e8997a 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -347,8 +347,8 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
             <div
               className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center font-black text-3xl"
               style={avatarPreview
-                ? { border: "2px solid rgba(22,196,127,0.3)" }
-                : { background: "rgba(245,196,81,0.15)", border: "2px solid rgba(245,196,81,0.35)", color: "#f5c451" }}
+                ? { border: "2px solid rgba(79,125,247,0.3)" }
+                : { background: "rgba(232,153,122,0.15)", border: "2px solid rgba(232,153,122,0.35)", color: "#e8997a" }}
             >
               {avatarPreview
                 ? <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
@@ -360,9 +360,9 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
               disabled={avatarSaving}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50 transition-all hover:scale-105 active:scale-95"
               style={{
-                background: "rgba(22,196,127,0.12)",
-                border: "1px solid rgba(22,196,127,0.4)",
-                color: "#16c47f",
+                background: "rgba(79,125,247,0.12)",
+                border: "1px solid rgba(79,125,247,0.4)",
+                color: "#4f7df7",
               }}
             >
               <IoCamera className="text-base" />
@@ -397,7 +397,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
             onClick={handleSaveName}
             disabled={nameSaving || !nameDirty}
             className="self-start px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-40 transition-opacity"
-            style={{ background: "linear-gradient(135deg, #16c47f 0%, #0db36e 100%)", color: "#000" }}
+            style={{ background: "linear-gradient(135deg, #4f7df7 0%, #3461e0 100%)", color: "#000" }}
           >
             {nameSaving ? "Saving…" : "Save Name"}
           </button>
@@ -441,7 +441,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
             onClick={handleSaveEmail}
             disabled={emailSaving || !emailDirty}
             className="self-start px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-40 transition-opacity"
-            style={{ background: "linear-gradient(135deg, #16c47f 0%, #0db36e 100%)", color: "#000" }}
+            style={{ background: "linear-gradient(135deg, #4f7df7 0%, #3461e0 100%)", color: "#000" }}
           >
             {emailSaving ? "Saving…" : "Save Email"}
           </button>
@@ -472,7 +472,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
             onClick={handleChangePassword}
             disabled={pwSaving || !currentPw || !newPw || !confirmPw}
             className="self-start px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-40 transition-opacity"
-            style={{ background: "linear-gradient(135deg, #16c47f 0%, #0db36e 100%)", color: "#000" }}
+            style={{ background: "linear-gradient(135deg, #4f7df7 0%, #3461e0 100%)", color: "#000" }}
           >
             {pwSaving ? "Changing…" : "Change Password"}
           </button>
@@ -482,7 +482,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
         <div className="rounded-2xl p-6 flex flex-col gap-4" style={DANGER_CARD_STYLE}>
           <h2 className="text-xs font-bold text-red-400/60 uppercase tracking-widest">Danger Zone</h2>
           <p className="text-xs text-white/40 leading-relaxed">
-            Permanently delete your account and all associated data — watch history, audio progress, comments, and saved favorites. This cannot be undone.
+            Permanently delete your account and all associated data — watch history, comments, and saved favorites. This cannot be undone.
           </p>
 
           <AnimatePresence mode="wait" initial={false}>
@@ -648,7 +648,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
             >
               <div
                 className="w-full max-w-sm rounded-2xl p-6 flex flex-col items-center gap-5"
-                style={{ background: "linear-gradient(145deg, #1a2e22 0%, #111111 100%)", border: "1px solid rgba(22,196,127,0.25)", boxShadow: "0 24px 64px rgba(0,0,0,0.6)" }}
+                style={{ background: "linear-gradient(145deg, #0f1220 0%, #111111 100%)", border: "1px solid rgba(79,125,247,0.25)", boxShadow: "0 24px 64px rgba(0,0,0,0.6)" }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="text-center">
@@ -662,7 +662,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                     width: CROP_PREVIEW, height: CROP_PREVIEW,
                     borderRadius: "50%", overflow: "hidden", position: "relative",
                     cursor: isDragging ? "grabbing" : "grab",
-                    border: "3px solid rgba(22,196,127,0.4)",
+                    border: "3px solid rgba(79,125,247,0.4)",
                     background: "#111", flexShrink: 0,
                     userSelect: "none",
                   }}
@@ -702,7 +702,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                     step={0.01}
                     value={cropScale}
                     onChange={(e) => setCropScale(Number(e.target.value))}
-                    className="flex-1 accent-[#16c47f]"
+                    className="flex-1 accent-[#4f7df7]"
                   />
                   <button
                     onClick={() => setCropScale(s => Math.min(s + 0.1, cropMinScale * 5))}
@@ -721,7 +721,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                     onClick={confirmCrop}
                     disabled={avatarSaving}
                     className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50 transition-opacity"
-                    style={{ background: "linear-gradient(135deg, #16c47f 0%, #0db36e 100%)", color: "#000" }}
+                    style={{ background: "linear-gradient(135deg, #4f7df7 0%, #3461e0 100%)", color: "#000" }}
                   >{avatarSaving ? "Saving…" : "Save Photo"}</button>
                 </div>
               </div>

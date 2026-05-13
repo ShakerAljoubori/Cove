@@ -2,12 +2,12 @@
 
 @theme {
   /* Brand Colors */
-  --color-brand-primary: #16c47f;
-  --color-brand-secondary: #f5c451;
+  --color-brand-primary: #4f7df7;
+  --color-brand-accent: #e8997a;
 
   /* Background & Surface Colors */
-  --color-app-bg: #080808;
-  --color-app-card: #141414;
+  --color-app-bg: #080b18;
+  --color-app-card: #0d1225;
 
   /* Text Colors */
   --color-text-main: #ffffff;
@@ -25,5 +25,5 @@ button, [role="button"] {
 
 body {
   min-height: 100vh;
-  background: #080808;
+  background: #080b18;
 }

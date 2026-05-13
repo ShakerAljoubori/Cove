@@ -2,29 +2,21 @@ import React, { createContext, useContext, useState } from "react";
 
 interface FavoritesState {
   seriesIds: string[];
-  bookIds: string[];
   videoEpisodes: { seriesId: string; episodeId: number }[];
-  audioEpisodes: { bookId: string; episodeId: number }[];
 }
 
 interface FavoritesContextType extends FavoritesState {
   fetchFavorites: () => Promise<void>;
   clearFavorites: () => void;
   toggleSeries: (seriesId: string) => Promise<void>;
-  toggleBook: (bookId: string) => Promise<void>;
   toggleVideoEpisode: (seriesId: string, episodeId: number) => Promise<void>;
-  toggleAudioEpisode: (bookId: string, episodeId: number) => Promise<void>;
   isSeriesFavorite: (id: string) => boolean;
-  isBookFavorite: (id: string) => boolean;
   isVideoEpisodeSaved: (seriesId: string, episodeId: number) => boolean;
-  isAudioEpisodeSaved: (bookId: string, episodeId: number) => boolean;
 }
 
 const empty: FavoritesState = {
   seriesIds: [],
-  bookIds: [],
   videoEpisodes: [],
-  audioEpisodes: [],
 };
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
@@ -51,7 +43,6 @@ export const FavoritesProvider = ({ children }: { children: React.ReactNode }) =
 
   const clearFavorites = () => setFav(empty);
 
-  // Generic toggle that does an optimistic update, calls the endpoint, then syncs
   const toggle = async (
     optimisticUpdate: (prev: FavoritesState) => FavoritesState,
     endpoint: string,
@@ -59,17 +50,17 @@ export const FavoritesProvider = ({ children }: { children: React.ReactNode }) =
   ) => {
     const t = token();
     if (!t) return;
-    setFav(optimisticUpdate); // instant UI feedback
+    setFav(optimisticUpdate);
     try {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: headers(t),
         body: JSON.stringify(body),
       });
-      if (res.ok) setFav(await res.json()); // sync with server truth
-      else setFav(fav); // revert on error
+      if (res.ok) setFav(await res.json());
+      else setFav(fav);
     } catch {
-      setFav(fav); // revert on network error
+      setFav(fav);
     }
   };
 
@@ -83,18 +74,6 @@ export const FavoritesProvider = ({ children }: { children: React.ReactNode }) =
       }),
       `${API}/series`,
       { seriesId }
-    );
-
-  const toggleBook = (bookId: string) =>
-    toggle(
-      (prev) => ({
-        ...prev,
-        bookIds: prev.bookIds.includes(bookId)
-          ? prev.bookIds.filter((id) => id !== bookId)
-          : [...prev.bookIds, bookId],
-      }),
-      `${API}/books`,
-      { bookId }
     );
 
   const toggleVideoEpisode = (seriesId: string, episodeId: number) =>
@@ -116,25 +95,6 @@ export const FavoritesProvider = ({ children }: { children: React.ReactNode }) =
       { seriesId, episodeId }
     );
 
-  const toggleAudioEpisode = (bookId: string, episodeId: number) =>
-    toggle(
-      (prev) => {
-        const exists = prev.audioEpisodes.some(
-          (e) => e.bookId === bookId && e.episodeId === episodeId
-        );
-        return {
-          ...prev,
-          audioEpisodes: exists
-            ? prev.audioEpisodes.filter(
-                (e) => !(e.bookId === bookId && e.episodeId === episodeId)
-              )
-            : [...prev.audioEpisodes, { bookId, episodeId }],
-        };
-      },
-      `${API}/episodes/audio`,
-      { bookId, episodeId }
-    );
-
   return (
     <FavoritesContext.Provider
       value={{
@@ -142,18 +102,11 @@ export const FavoritesProvider = ({ children }: { children: React.ReactNode }) =
         fetchFavorites,
         clearFavorites,
         toggleSeries,
-        toggleBook,
         toggleVideoEpisode,
-        toggleAudioEpisode,
         isSeriesFavorite: (id) => fav.seriesIds.includes(id),
-        isBookFavorite: (id) => fav.bookIds.includes(id),
         isVideoEpisodeSaved: (seriesId, episodeId) =>
           fav.videoEpisodes.some(
             (e) => e.seriesId === seriesId && e.episodeId === episodeId
-          ),
-        isAudioEpisodeSaved: (bookId, episodeId) =>
-          fav.audioEpisodes.some(
-            (e) => e.bookId === bookId && e.episodeId === episodeId
           ),
       }}
     >

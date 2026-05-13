@@ -8,9 +8,7 @@ const UserSchema = new mongoose.Schema({
   date:     { type: Date, default: Date.now },
   favorites: {
     seriesIds:     { type: [String], default: [] },
-    bookIds:       { type: [String], default: [] },
     videoEpisodes: { type: [{ seriesId: String, episodeId: Number, _id: false }], default: [] },
-    audioEpisodes: { type: [{ bookId: String,   episodeId: Number, _id: false }], default: [] },
   }
 });
 

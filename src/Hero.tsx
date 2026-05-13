@@ -18,25 +18,25 @@ function Hero({ onPlay, user }: HeroProps) {
 
       {/* Background image */}
       <div
-        className="absolute inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: `url('${featured.thumbnail}')` }}
+        className="absolute inset-0 z-0 bg-cover"
+        style={{ backgroundImage: `url('${featured.backdrop ?? featured.thumbnail}')`, backgroundPosition: "right center" }}
       />
 
       {/* Left fade — image bleeds to black cleanly */}
-      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(90deg, #080808 30%, rgba(8,8,8,0.7) 60%, rgba(8,8,8,0.1) 100%)" }} />
+      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(90deg, #080b18 20%, rgba(8,11,24,0.6) 45%, rgba(8,11,24,0.0) 70%)" }} />
 
       {/* Bottom fade — hero floor connects to page */}
-      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to top, #080808 0%, rgba(8,8,8,0.5) 20%, transparent 50%)" }} />
+      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to top, #080b18 0%, rgba(8,11,24,0.5) 20%, transparent 50%)" }} />
 
       {/* Top fade */}
-      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to bottom, rgba(8,8,8,0.4) 0%, transparent 30%)" }} />
+      <div className="absolute inset-0 z-10" style={{ background: "linear-gradient(to bottom, rgba(8,11,24,0.4) 0%, transparent 30%)" }} />
 
       <div className="relative z-20 max-w-2xl mt-28">
 
         {/* Featured badge — gold */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-6 rounded-full" style={{ background: "rgba(245,196,81,0.1)", border: "1px solid rgba(245,196,81,0.3)" }}>
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#f5c451" }} />
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#f5c451" }}>Featured</span>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-6 rounded-full" style={{ background: "rgba(232,153,122,0.1)", border: "1px solid rgba(232,153,122,0.3)" }}>
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#e8997a" }} />
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#e8997a" }}>Featured</span>
         </div>
 
         <div className="mb-4">
@@ -60,12 +60,12 @@ function Hero({ onPlay, user }: HeroProps) {
             onClick={() => onPlay(featured.id)}
             className="flex items-center gap-2 text-black px-8 py-3 rounded-lg font-bold transition-all duration-300 hover:scale-105 hover:brightness-110 cursor-pointer"
             style={{
-              background: "linear-gradient(135deg, #22e696 0%, #16c47f 60%, #0db36e 100%)",
-              boxShadow: "0 0 28px rgba(22,196,127,0.45), 0 4px 12px rgba(0,0,0,0.4)",
+              background: "linear-gradient(135deg, #7b9df9 0%, #4f7df7 60%, #3461e0 100%)",
+              boxShadow: "0 0 28px rgba(79,125,247,0.45), 0 4px 12px rgba(0,0,0,0.4)",
             }}
           >
             <span className="text-lg">▶</span>
-            Play Lecture
+            Watch Now
           </button>
 
           {user && (
@@ -73,7 +73,7 @@ function Hero({ onPlay, user }: HeroProps) {
               onClick={() => toggleSeries(featured.id)}
               className="p-3 rounded-lg font-bold transition-all duration-300 hover:scale-105 cursor-pointer"
               style={saved
-                ? { background: "rgba(22,196,127,0.15)", border: "1px solid rgba(22,196,127,0.4)", color: "#16c47f" }
+                ? { background: "rgba(79,125,247,0.15)", border: "1px solid rgba(79,125,247,0.4)", color: "#4f7df7" }
                 : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.6)" }}
               title={saved ? "Remove from favorites" : "Save to favorites"}
             >

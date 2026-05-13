@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const WatchProgress = require('../models/WatchProgress');
-const AudioProgress = require('../models/AudioProgress');
 const Comment = require('../models/Comment');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -142,24 +141,6 @@ router.post('/favorites/series', auth, async (req, res) => {
   }
 });
 
-// TOGGLE AUDIOBOOK FAVORITE
-router.post('/favorites/books', auth, async (req, res) => {
-  try {
-    const { bookId } = req.body;
-    const user = await User.findById(req.user.id);
-    const exists = user.favorites.bookIds.includes(bookId);
-    await User.findByIdAndUpdate(req.user.id,
-      exists
-        ? { $pull:     { 'favorites.bookIds': bookId } }
-        : { $addToSet: { 'favorites.bookIds': bookId } }
-    );
-    const updated = await User.findById(req.user.id).select('favorites');
-    res.json(updated.favorites);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // TOGGLE VIDEO EPISODE BOOKMARK
 router.post('/favorites/episodes/video', auth, async (req, res) => {
   try {
@@ -172,26 +153,6 @@ router.post('/favorites/episodes/video', auth, async (req, res) => {
       exists
         ? { $pull:     { 'favorites.videoEpisodes': { seriesId, episodeId: Number(episodeId) } } }
         : { $addToSet: { 'favorites.videoEpisodes': { seriesId, episodeId: Number(episodeId) } } }
-    );
-    const updated = await User.findById(req.user.id).select('favorites');
-    res.json(updated.favorites);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// TOGGLE AUDIO EPISODE BOOKMARK
-router.post('/favorites/episodes/audio', auth, async (req, res) => {
-  try {
-    const { bookId, episodeId } = req.body;
-    const user = await User.findById(req.user.id);
-    const exists = user.favorites.audioEpisodes.some(
-      e => e.bookId === bookId && e.episodeId === Number(episodeId)
-    );
-    await User.findByIdAndUpdate(req.user.id,
-      exists
-        ? { $pull:     { 'favorites.audioEpisodes': { bookId, episodeId: Number(episodeId) } } }
-        : { $addToSet: { 'favorites.audioEpisodes': { bookId, episodeId: Number(episodeId) } } }
     );
     const updated = await User.findById(req.user.id).select('favorites');
     res.json(updated.favorites);
@@ -283,7 +244,6 @@ router.delete('/account', auth, async (req, res) => {
     if (!isMatch) return res.status(400).json({ msg: 'Password is incorrect' });
     await Promise.all([
       WatchProgress.deleteMany({ userId: req.user.id }),
-      AudioProgress.deleteMany({ userId: req.user.id }),
       Comment.deleteMany({ userId: req.user.id }),
       User.findByIdAndDelete(req.user.id),
     ]);

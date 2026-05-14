@@ -67,20 +67,20 @@ const Login = ({ onSwitch, onLogin }: LoginProps) => {
 
         <div className="text-center">
           <div className="inline-block mb-1"><CoveLogo size={36} /></div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Welcome Back</h2>
-          <p className="mt-1 text-xs text-white/40">Enter your credentials to access your lectures</p>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Welcome Back</h2>
+          <p className="mt-1 text-sm text-white/40">Enter your credentials to access your lectures</p>
         </div>
 
         <form className="space-y-3" onSubmit={handleSubmit}>
           <div className="space-y-2">
             <div>
-              <label className="block text-xs font-medium text-white/60 uppercase tracking-wider mb-1">
+              <label className="block text-sm font-medium text-white/60 uppercase tracking-wider mb-1">
                 Email Address
               </label>
               <input
                 type="email"
                 required
-                className="w-full rounded-xl px-3 py-2 text-sm text-white focus:outline-none transition-all"
+                className="w-full rounded-xl px-3 py-2 text-base text-white focus:outline-none transition-all"
                 style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(79,125,247,0.15)" }}
                 placeholder="name@example.com"
                 onFocus={e => (e.currentTarget.style.borderColor = "rgba(79,125,247,0.5)")}
@@ -89,13 +89,13 @@ const Login = ({ onSwitch, onLogin }: LoginProps) => {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-white/60 uppercase tracking-wider mb-1">
+              <label className="block text-sm font-medium text-white/60 uppercase tracking-wider mb-1">
                 Password
               </label>
               <input
                 type="password"
                 required
-                className="w-full rounded-xl px-3 py-2 text-sm text-white focus:outline-none transition-all"
+                className="w-full rounded-xl px-3 py-2 text-base text-white focus:outline-none transition-all"
                 style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(79,125,247,0.15)" }}
                 placeholder="••••••••"
                 onFocus={e => (e.currentTarget.style.borderColor = "rgba(79,125,247,0.5)")}
@@ -106,14 +106,14 @@ const Login = ({ onSwitch, onLogin }: LoginProps) => {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
               <span className="shrink-0">✕</span>
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#4f7df7]/10 border border-[#4f7df7]/20 text-[#4f7df7] text-xs">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#4f7df7]/10 border border-[#4f7df7]/20 text-[#4f7df7] text-sm">
               <span className="shrink-0">✓</span>
               <span>{success}</span>
             </div>
@@ -129,7 +129,7 @@ const Login = ({ onSwitch, onLogin }: LoginProps) => {
           </button>
         </form>
 
-        <p className="text-center text-sm text-white/40">
+        <p className="text-center text-base text-white/40">
           Don't have an account?{" "}
           <button onClick={onSwitch} className="text-[#4f7df7] hover:underline font-medium">
             Register here

@@ -5,11 +5,13 @@ import {
   IoHeart, IoHeartOutline, IoBookmark, IoBookmarkOutline, IoClose,
   IoThumbsUp, IoThumbsUpOutline, IoThumbsDown, IoThumbsDownOutline,
   IoFlag, IoFlagOutline, IoPaperPlane, IoTrash, IoPencil, IoCheckmark,
-  IoReturnDownForward,
+  IoReturnDownForward, IoPeople, IoCopy,
 } from "react-icons/io5";
-import VideoPlayer from "./VideoPlayer";
+import VideoPlayer, { type ReactionBucket, type VideoPlayerHandle } from "./VideoPlayer";
+import WatchPartyModal from "./WatchPartyModal";
 import { useFavorites } from "./FavoritesContext";
 import { useWatchProgress } from "./WatchProgressContext";
+import { useWatchParty } from "./WatchPartyContext";
 import { allSeries } from "./data";
 import type { Series, Episode } from "./data";
 import { formatTime } from "./utils";
@@ -34,6 +36,7 @@ interface VideoDetailsProps {
   initialEpisodeId?: number;
   initialTimestamp?: number;
   onSelectSeries?: (seriesId: string) => void;
+  onRegisterPartyOpener?: (fn: () => void) => void;
 }
 
 const SPRING = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -78,7 +81,7 @@ function formatRelativeTime(dateStr: string) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimestamp, onSelectSeries }: VideoDetailsProps) {
+function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimestamp, onSelectSeries, onRegisterPartyOpener }: VideoDetailsProps) {
   const startEpisode = series.episodes.find((e) => e.id === initialEpisodeId) ?? series.episodes[0];
   const [currentEpisode, setCurrentEpisode] = useState<Episode>(startEpisode);
   const [seekTo, setSeekTo] = useState<number | undefined>(initialTimestamp);
@@ -104,6 +107,19 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
   const replyListRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const replyInputRef = useRef<HTMLInputElement>(null);
 
+  const [momentReactions, setMomentReactions] = useState<ReactionBucket[]>([]);
+  const [showPartyModal, setShowPartyModal] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const playerRef = useRef<VideoPlayerHandle>(null);
+  const suppressPartyRef = useRef(0);
+
+  const {
+    roomCode, members, isHost, isInParty,
+    emitPlay, emitPause, emitSeek, emitChangeEpisode,
+    subscribePlay, subscribePause, subscribeSeek, subscribeEpisodeChange,
+    leaveParty,
+  } = useWatchParty();
+
   const [userReaction, setUserReaction] = useState<"like" | "dislike" | null>(null);
   const [reactionCounts, setReactionCounts] = useState({ likes: 0, dislikes: 0 });
   const [pendingReaction, setPendingReaction] = useState(false);
@@ -118,6 +134,11 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
   const { saveProgress } = useWatchProgress();
   const seriesSaved = isSeriesFavorite(series.id);
   const episodeBookmarked = isVideoEpisodeSaved(series.id, currentEpisode.id);
+
+  useEffect(() => {
+    onRegisterPartyOpener?.(() => setShowPartyModal(true));
+    return () => { onRegisterPartyOpener?.(null as unknown as () => void); };
+  }, [onRegisterPartyOpener]);
 
   useEffect(() => {
     series.episodes.forEach((ep) => {
@@ -156,13 +177,101 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
     }
   };
 
+  const fetchMomentReactions = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/moment-reactions/${series.id}/${currentEpisode.id}`);
+      if (res.ok) setMomentReactions(await res.json());
+    } catch {
+      // non-critical — heatmap just won't show
+    }
+  };
+
+  const handleMomentReact = async (emoji: string, timestamp: number) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const res = await fetch("http://localhost:5000/api/moment-reactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-auth-token": token },
+        body: JSON.stringify({ seriesId: series.id, episodeId: currentEpisode.id, timestamp, emoji }),
+      });
+      if (res.ok) {
+        const { added } = await res.json();
+        const bucket = Math.floor(timestamp / 5);
+        setMomentReactions(prev => {
+          const existing = prev.find(r => r.bucket === bucket);
+          if (!existing) {
+            if (!added) return prev;
+            return [...prev, { bucket, count: 1, topEmoji: emoji }].sort((a, b) => a.bucket - b.bucket);
+          }
+          const newCount = added ? existing.count + 1 : Math.max(0, existing.count - 1);
+          if (newCount === 0) return prev.filter(r => r.bucket !== bucket);
+          return prev.map(r => r.bucket === bucket ? { ...r, count: newCount } : r);
+        });
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     fetchComments();
     fetchReactions();
+    fetchMomentReactions();
     setReported(false);
     setReplyingToId(null);
     setExpandedReplies([]);
   }, [series.id, currentEpisode.id]);
+
+  // ── Watch party sync ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isInParty) return;
+
+    const suppress = (fn: () => void) => {
+      suppressPartyRef.current++;
+      fn();
+      setTimeout(() => { suppressPartyRef.current = Math.max(0, suppressPartyRef.current - 1); }, 250);
+    };
+
+    const unsubPlay = subscribePlay((t) => {
+      suppress(() => {
+        playerRef.current?.seekTo(t);
+        playerRef.current?.play();
+      });
+    });
+    const unsubPause = subscribePause((t) => {
+      suppress(() => {
+        playerRef.current?.seekTo(t);
+        playerRef.current?.pause();
+      });
+    });
+    const unsubSeek = subscribeSeek((t) => {
+      suppress(() => { playerRef.current?.seekTo(t); });
+    });
+    const unsubEpisode = subscribeEpisodeChange((id) => {
+      const ep = series.episodes.find(e => e.id === id);
+      if (ep) { suppress(() => { setCurrentEpisode(ep); setSeekTo(undefined); setShouldAutoPlay(true); }); }
+    });
+
+    return () => { unsubPlay(); unsubPause(); unsubSeek(); unsubEpisode(); };
+  }, [isInParty, subscribePlay, subscribePause, subscribeSeek, subscribeEpisodeChange, series.episodes]);
+
+  const handlePartyPlay = (t: number) => {
+    if (isInParty && suppressPartyRef.current === 0) emitPlay(t);
+  };
+  const handlePartyPause = (t: number) => {
+    if (isInParty && suppressPartyRef.current === 0) emitPause(t);
+  };
+  const handlePartySeek = (t: number) => {
+    if (isInParty && suppressPartyRef.current === 0) emitSeek(t);
+  };
+
+  const handleCopyCode = async () => {
+    if (!roomCode) return;
+    await navigator.clipboard.writeText(roomCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
 
   // Updates a comment (or reply nested inside one) by id
   const updateCommentInState = (id: string, updater: (c: CommentType) => CommentType) => {
@@ -384,8 +493,8 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
         {/* Body */}
         <div className="cb flex-1 min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-white/90">{c.userName}</span>
-            <span className="text-xs text-white/30">{formatRelativeTime(c.createdAt)}</span>
+            <span className="text-base font-semibold text-white/90">{c.userName}</span>
+            <span className="text-sm text-white/30">{formatRelativeTime(c.createdAt)}</span>
             {c.editedAt && <span className="text-[10px] text-white/20 italic">edited</span>}
           </div>
 
@@ -398,7 +507,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                 onKeyDown={(e) => { if (e.key === "Enter") editComment(c._id); if (e.key === "Escape") setEditingId(null); }}
                 maxLength={1000}
                 autoFocus
-                className="flex-1 bg-white/5 border border-brand-primary/40 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none"
+                className="flex-1 bg-white/5 border border-brand-primary/40 rounded-lg px-3 py-1.5 text-base text-white focus:outline-none"
               />
               <button onClick={() => editComment(c._id)} disabled={savingEdit} className="p-1.5 text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all disabled:opacity-40">
                 <IoCheckmark className="text-base" />
@@ -408,7 +517,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
               </button>
             </div>
           ) : (
-            <p className="text-sm text-white/65 mt-1 leading-relaxed break-words">
+            <p className="text-base text-white/65 mt-1 leading-relaxed break-words">
               {(() => {
                 const match = c.text.match(/^(@\S+)([\s\S]*)$/);
                 if (match) return <><span className="text-brand-primary font-medium">{match[1]}</span>{match[2]}</>;
@@ -422,14 +531,14 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
             <div className="cc flex items-center gap-3 mt-2">
               <button
                 onClick={() => toggleCommentReaction(c._id, "like")}
-                className={`flex items-center gap-1 text-xs transition-all hover:scale-110 active:scale-95 ${userLiked ? "text-brand-primary" : "text-white/30 hover:text-white/60"}`}
+                className={`flex items-center gap-1 text-sm transition-all hover:scale-110 active:scale-95 ${userLiked ? "text-brand-primary" : "text-white/30 hover:text-white/60"}`}
               >
                 {userLiked ? <IoThumbsUp className="text-sm" /> : <IoThumbsUpOutline className="text-sm" />}
                 {c.likes.length > 0 && <span>{c.likes.length}</span>}
               </button>
               <button
                 onClick={() => toggleCommentReaction(c._id, "dislike")}
-                className={`flex items-center gap-1 text-xs transition-all hover:scale-110 active:scale-95 ${userDisliked ? "text-red-400" : "text-white/30 hover:text-white/60"}`}
+                className={`flex items-center gap-1 text-sm transition-all hover:scale-110 active:scale-95 ${userDisliked ? "text-red-400" : "text-white/30 hover:text-white/60"}`}
               >
                 {userDisliked ? <IoThumbsDown className="text-sm" /> : <IoThumbsDownOutline className="text-sm" />}
                 {c.dislikes.length > 0 && <span>{c.dislikes.length}</span>}
@@ -457,7 +566,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                       }, alreadyOpen ? 0 : 60);
                     }
                   }}
-                  className="flex items-center gap-1 text-xs text-white/30 hover:text-brand-primary transition-all"
+                  className="flex items-center gap-1 text-sm text-white/30 hover:text-brand-primary transition-all"
                 >
                   <IoReturnDownForward className="text-sm" />
                   <span>Reply</span>
@@ -546,6 +655,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                     }}
                   >
                     <VideoPlayer
+                      ref={playerRef}
                       url={currentEpisode.url}
                       title={`${series.title} — ${currentEpisode.title}`}
                       onClose={onBack}
@@ -555,6 +665,12 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                       onProgress={(timestamp, duration, snapshot) =>
                         saveProgress(series.id, currentEpisode.id, timestamp, duration, snapshot)
                       }
+                      reactions={momentReactions}
+                      onReact={user ? handleMomentReact : undefined}
+                      canReact={!!user}
+                      onUserPlay={handlePartyPlay}
+                      onUserPause={handlePartyPause}
+                      onUserSeek={handlePartySeek}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -566,7 +682,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                 {/* Title + meta */}
                 <motion.div variants={staggerItem}>
                   <h1 className="text-2xl md:text-3xl font-bold text-text-main leading-tight">{series.title}</h1>
-                  <div className="mt-1.5 flex gap-3 text-xs font-medium uppercase tracking-widest">
+                  <div className="mt-1.5 flex gap-3 text-sm font-medium uppercase tracking-widest">
                     <span style={{ color: "rgba(79,125,247,0.8)" }}>{series.category}</span>
                     <span className="text-white/20">|</span>
                     <span className="text-text-muted">{series.instructor}</span>
@@ -578,7 +694,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
 
                   <button
                     onClick={async () => { if (!user || pendingSeries) return; setPendingSeries(true); await toggleSeries(series.id); setPendingSeries(false); }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:scale-105 active:scale-95 ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-base font-medium border transition-all hover:scale-105 active:scale-95 ${
                       seriesSaved ? "bg-[#4f7df7]/10 border-[#4f7df7]/30 text-[#4f7df7]" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
                     } ${!user ? "opacity-40 cursor-not-allowed" : ""} ${pendingSeries ? "opacity-50 pointer-events-none" : ""}`}
                   >
@@ -588,7 +704,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
 
                   <button
                     onClick={async () => { if (!user || pendingEpisode) return; setPendingEpisode(true); await toggleVideoEpisode(series.id, currentEpisode.id); setPendingEpisode(false); }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:scale-105 active:scale-95 ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-base font-medium border transition-all hover:scale-105 active:scale-95 ${
                       episodeBookmarked ? "bg-[#e8997a]/10 border-[#e8997a]/30 text-[#e8997a]" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
                     } ${!user ? "opacity-40 cursor-not-allowed" : ""} ${pendingEpisode ? "opacity-50 pointer-events-none" : ""}`}
                   >
@@ -616,7 +732,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                         setPendingReaction(false);
                       }
                     }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:scale-105 active:scale-95 ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-base font-medium border transition-all hover:scale-105 active:scale-95 ${
                       userReaction === "like" ? "bg-blue-500/10 border-blue-500/30 text-blue-400" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
                     } ${!user ? "opacity-40 cursor-not-allowed" : ""} ${pendingReaction ? "opacity-50 pointer-events-none" : ""}`}
                   >
@@ -644,7 +760,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                         setPendingReaction(false);
                       }
                     }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:scale-105 active:scale-95 ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-base font-medium border transition-all hover:scale-105 active:scale-95 ${
                       userReaction === "dislike" ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
                     } ${!user ? "opacity-40 cursor-not-allowed" : ""} ${pendingReaction ? "opacity-50 pointer-events-none" : ""}`}
                   >
@@ -654,14 +770,66 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
 
                   <button
                     onClick={() => setReported((prev) => !prev)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:scale-105 active:scale-95 ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-base font-medium border transition-all hover:scale-105 active:scale-95 ${
                       reported ? "bg-orange-500/10 border-orange-500/30 text-orange-400 cursor-default" : "bg-white/5 border-white/10 text-white/50 hover:text-red-400 hover:border-red-500/30"
                     }`}
                   >
                     {reported ? <IoFlag className="text-base" /> : <IoFlagOutline className="text-base" />}
                     <span>{reported ? "Reported" : "Report"}</span>
                   </button>
+
+                  <button
+                    onClick={() => setShowPartyModal(true)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-base font-medium border transition-all hover:scale-105 active:scale-95 ${
+                      isInParty
+                        ? "bg-[#4f7df7]/10 border-[#4f7df7]/30 text-[#4f7df7]"
+                        : "bg-white/5 border-white/10 text-white/50 hover:text-white hover:border-white/25"
+                    }`}
+                  >
+                    <IoPeople className="text-base" />
+                    <span>{isInParty ? `Party · ${members.length}` : "Watch Party"}</span>
+                  </button>
                 </motion.div>
+
+                {/* ── Party bar ── */}
+                {isInParty && roomCode && (
+                  <motion.div
+                    variants={staggerItem}
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl flex-wrap"
+                    style={{ background: "rgba(79,125,247,0.07)", border: "1px solid rgba(79,125,247,0.2)" }}
+                  >
+                    <div className="flex items-center gap-2 mr-1">
+                      <span className="w-2 h-2 rounded-full bg-[#4f7df7] animate-pulse shrink-0" />
+                      <span className="text-xs font-bold uppercase tracking-widest text-[#4f7df7]">Live Party</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: "rgba(79,125,247,0.1)", border: "1px solid rgba(79,125,247,0.25)" }}>
+                      <span className="text-sm font-black tracking-[0.18em] text-white">{roomCode}</span>
+                      <button onClick={handleCopyCode} className="text-white/40 hover:text-[#4f7df7] transition-colors ml-1">
+                        {copiedCode ? <IoCheckmark className="text-xs" /> : <IoCopy className="text-xs" />}
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-1 flex-wrap flex-1">
+                      {members.map(m => (
+                        <div key={m.socketId} title={m.userName} className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold text-black overflow-hidden border-2"
+                          style={m.socketId === members[0]?.socketId && isHost ? { borderColor: "#4f7df7" } : { borderColor: "transparent" }}>
+                          {m.avatar
+                            ? <img src={m.avatar} className="w-full h-full object-cover" alt={m.userName} style={{ background: "linear-gradient(135deg, #7b9df9, #4f7df7)" }} />
+                            : <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #7b9df9, #4f7df7)" }}>{m.userName[0].toUpperCase()}</div>
+                          }
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={leaveParty}
+                      className="text-xs text-white/30 hover:text-red-400 transition-colors font-medium ml-auto shrink-0"
+                    >
+                      Leave
+                    </button>
+                  </motion.div>
+                )}
 
                 {/* Like/dislike ratio bar */}
                 {(reactionCounts.likes + reactionCounts.dislikes) > 0 && (
@@ -669,13 +837,13 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-1.5">
                         <IoThumbsUp className="text-[10px] text-[#4f7df7]" />
-                        <span className="text-xs font-semibold text-[#4f7df7] tabular-nums">{reactionCounts.likes}</span>
+                        <span className="text-sm font-semibold text-[#4f7df7] tabular-nums">{reactionCounts.likes}</span>
                       </div>
                       <span className="text-[10px] text-white/25 tabular-nums">
                         {Math.round((reactionCounts.likes / (reactionCounts.likes + reactionCounts.dislikes)) * 100)}% liked
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-white/30 tabular-nums">{reactionCounts.dislikes}</span>
+                        <span className="text-sm font-semibold text-white/30 tabular-nums">{reactionCounts.dislikes}</span>
                         <IoThumbsDown className="text-[10px] text-white/30" />
                       </div>
                     </div>
@@ -692,15 +860,15 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                 )}
 
                 {/* Description */}
-                <motion.p variants={staggerItem} className="text-text-muted mt-5 leading-relaxed text-sm">
+                <motion.p variants={staggerItem} className="text-text-muted mt-5 leading-relaxed text-base">
                   {series.description}
                 </motion.p>
 
                 {/* Comments */}
                 <motion.div variants={staggerItem} className="mt-10">
-                  <h3 className="text-base font-bold mb-5" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  <h3 className="text-lg font-bold mb-5" style={{ color: "rgba(255,255,255,0.85)" }}>
                     Comments{" "}
-                    <span className="text-white/30 font-normal text-sm">({comments.length})</span>
+                    <span className="text-white/30 font-normal text-base">({comments.length})</span>
                   </h3>
 
                   {/* Top-level input */}
@@ -721,7 +889,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                             onKeyDown={(e) => e.key === "Enter" && postComment()}
                             placeholder="Add a comment..."
                             maxLength={1000}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 pr-11 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-primary/50 transition-colors"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 pr-11 text-base text-white placeholder-white/30 focus:outline-none focus:border-brand-primary/50 transition-colors"
                           />
                           <button
                             onClick={postComment}
@@ -742,7 +910,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                       </div>
                     </div>
                   ) : (
-                    <p className="text-white/30 text-sm mb-7 italic">Log in to leave a comment.</p>
+                    <p className="text-white/30 text-base mb-7 italic">Log in to leave a comment.</p>
                   )}
 
                   {/* Comment list */}
@@ -759,7 +927,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                       ))}
                     </div>
                   ) : comments.length === 0 ? (
-                    <p className="text-white/20 text-sm italic">No comments yet. Be the first!</p>
+                    <p className="text-white/20 text-base italic">No comments yet. Be the first!</p>
                   ) : (
                     <div className="space-y-6" ref={commentListRef}>
                       {comments.map((c) => (
@@ -798,7 +966,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                                       placeholder={`Reply to ${c.userName}…`}
                                       maxLength={1000}
                                       autoFocus
-                                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 pr-10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-primary/40 transition-colors"
+                                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 pr-10 text-base text-white placeholder-white/30 focus:outline-none focus:border-brand-primary/40 transition-colors"
                                     />
                                     <button
                                       onClick={() => postReply(c._id)}
@@ -810,7 +978,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                                   </div>
                                   <button
                                     onClick={() => { setReplyingToId(null); setReplyText(""); }}
-                                    className="text-xs text-white/30 hover:text-white/60 transition-colors shrink-0"
+                                    className="text-sm text-white/30 hover:text-white/60 transition-colors shrink-0"
                                   >
                                     Cancel
                                   </button>
@@ -825,7 +993,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                             <div className="ml-11">
                               <button
                                 onClick={() => toggleReplies(c._id)}
-                                className="flex items-center gap-1.5 text-xs text-brand-primary/80 hover:text-brand-primary font-medium transition-colors mb-2"
+                                className="flex items-center gap-1.5 text-sm text-brand-primary/80 hover:text-brand-primary font-medium transition-colors mb-2"
                               >
                                 <IoReturnDownForward className={`text-sm transition-transform duration-200 ${expandedReplies.includes(c._id) ? "rotate-180" : ""}`} />
                                 {expandedReplies.includes(c._id)
@@ -880,8 +1048,8 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                 transition={{ delay: 0.22, type: "spring", stiffness: 300, damping: 30 }}
               >
                 <div className="p-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                  <h2 className="text-base font-bold">Course Content</h2>
-                  <p className="text-xs mt-0.5 font-medium" style={{ color: "rgba(232,153,122,0.7)" }}>
+                  <h2 className="text-lg font-bold">Course Content</h2>
+                  <p className="text-sm mt-0.5 font-medium" style={{ color: "rgba(232,153,122,0.9)" }}>
                     {series.episodes.length} episodes
                   </p>
                 </div>
@@ -902,13 +1070,18 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                           <motion.div layoutId="active-episode-bg" className="absolute inset-0 rounded-xl bg-brand-primary/10 border border-brand-primary/50" transition={SPRING} />
                         )}
                         <button
-                          onClick={() => { setCurrentEpisode(ep); setSeekTo(undefined); setShouldAutoPlay(true); }}
+                          onClick={() => {
+                            setCurrentEpisode(ep);
+                            setSeekTo(undefined);
+                            setShouldAutoPlay(true);
+                            if (isInParty) emitChangeEpisode(ep.id);
+                          }}
                           className="relative z-10 w-full text-left p-3 flex items-center gap-2.5 rounded-xl"
                         >
                           <span className={`shrink-0 text-[10px] font-mono tabular-nums w-5 text-center transition-colors duration-300 ${isActive ? "text-brand-primary" : "text-white/25"}`}>
                             {String(ep.id).padStart(2, "0")}
                           </span>
-                          <span className={`flex-1 text-xs font-medium truncate transition-colors duration-300 ${isActive ? "text-brand-primary" : "text-text-muted"}`}>
+                          <span className={`flex-1 text-sm font-medium truncate transition-colors duration-300 ${isActive ? "text-brand-primary" : "text-text-muted"}`}>
                             {ep.title}
                           </span>
                           <AnimatePresence>
@@ -947,7 +1120,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                   transition={{ delay: 0.32, type: "spring", stiffness: 300, damping: 30 }}
                 >
                   <div className="p-4 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                    <h2 className="text-base font-bold">Suggested</h2>
+                    <h2 className="text-lg font-bold">Suggested</h2>
                   </div>
                   <div className="p-2 space-y-1">
                     {suggestedSeries.map((s) => (
@@ -962,7 +1135,7 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
                           className="w-16 h-10 object-cover rounded-lg shrink-0 opacity-75 group-hover:opacity-100 transition-opacity"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium text-white/75 group-hover:text-white truncate transition-colors leading-snug">{s.title}</p>
+                          <p className="text-sm font-medium text-white/75 group-hover:text-white truncate transition-colors leading-snug">{s.title}</p>
                           <p className="text-[10px] text-white/30 mt-0.5 truncate">{s.instructor} · {s.episodes.length} ep</p>
                         </div>
                       </button>
@@ -975,6 +1148,18 @@ function VideoDetailsPage({ series, user, onBack, initialEpisodeId, initialTimes
           </div>
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {showPartyModal && (
+          <WatchPartyModal
+            seriesId={series.id}
+            episodeId={currentEpisode.id}
+            user={user}
+            initialTab={user ? "create" : "join"}
+            onClose={() => setShowPartyModal(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

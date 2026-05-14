@@ -115,10 +115,10 @@ function ContinueWatching({ onSelectVideo }: ContinueWatchingProps) {
                 </motion.div>
 
                 <div className="mt-2">
-                  <h4 className="text-sm font-semibold text-text-main group-hover:text-brand-primary transition-colors truncate">
+                  <h4 className="text-base font-semibold text-text-main group-hover:text-brand-primary transition-colors truncate">
                     {series.title}
                   </h4>
-                  <p className="text-xs text-text-muted truncate">
+                  <p className="text-sm text-text-muted truncate">
                     {episode?.title ?? "Episode"} · {Math.round(pct)}% watched
                   </p>
                 </div>
@@ -167,21 +167,21 @@ function ContinueWatching({ onSelectVideo }: ContinueWatchingProps) {
 
                 <div className="px-5 pt-3 pb-5 flex flex-col gap-4">
                   <div>
-                    <p className="text-xs text-text-muted mb-0.5">Remove from Continue Watching?</p>
-                    <p className="text-sm font-semibold text-text-main leading-snug">{modalSeries.title}</p>
+                    <p className="text-sm text-text-muted mb-0.5">Remove from Continue Watching?</p>
+                    <p className="text-base font-semibold text-text-main leading-snug">{modalSeries.title}</p>
                   </div>
 
                   <div className="flex gap-2">
                     <button
                       onClick={() => setModalTarget(null)}
-                      className="flex-1 py-2 rounded-lg text-sm font-medium text-text-muted transition-colors"
+                      className="flex-1 py-2 rounded-lg text-base font-medium text-text-muted transition-colors"
                       style={{ background: "rgba(255,255,255,0.06)" }}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleConfirmRemove}
-                      className="flex-1 py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 active:scale-95"
+                      className="flex-1 py-2 rounded-lg text-base font-semibold text-white transition-opacity hover:opacity-90 active:scale-95"
                       style={{ background: "linear-gradient(135deg, #e53e3e 0%, #c53030 100%)" }}
                     >
                       Remove

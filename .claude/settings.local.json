@@ -42,7 +42,15 @@
       "WebFetch(domain:pages.cs.wisc.edu)",
       "WebFetch(domain:api.themoviedb.org)",
       "Bash(curl *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(npm run *)",
+      "Bash(npx vite *)",
+      "Bash(pkill -f \"node server/index.js\")",
+      "Bash(node server/index.js)",
+      "Read(//home/shaker/Documents/**)",
+      "Bash(node -e \"require\\('./index.js'\\)\")",
+      "Bash(kill %1)",
+      "Bash(node *)"
     ]
   }
 }

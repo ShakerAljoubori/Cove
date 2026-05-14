@@ -34,7 +34,7 @@ function LoginGate({ onLogin, onRegister }: { onLogin: () => void; onRegister: (
           transition={{ ...spring, delay: 0.13 }}
         >
           <h2 className="text-2xl font-bold text-white">Sign in to see your favorites</h2>
-          <p className="text-sm text-white/40 leading-relaxed">
+          <p className="text-base text-white/40 leading-relaxed">
             Save series and bookmark individual episodes to access them anytime.
           </p>
         </motion.div>
@@ -128,7 +128,7 @@ function SavedLecturesTab({ onSelectSeries }: { onSelectSeries: (id: string, epi
           <div key={series.id} className="space-y-2">
             <button
               onClick={() => onSelectSeries(series.id)}
-              className="text-xs font-bold uppercase tracking-widest hover:underline"
+              className="text-sm font-bold uppercase tracking-widest hover:underline"
               style={{ color: "#4f7df7" }}
             >
               {series.title}
@@ -175,7 +175,7 @@ function EmptyState({ icon, text, sub }: { icon: React.ReactNode; text: string; 
         transition={{ ...spring, delay: 0.12 }}
       >
         <h2 className="text-xl font-semibold text-white/60">{text}</h2>
-        <p className="text-sm text-white/30 max-w-xs mt-1">{sub}</p>
+        <p className="text-base text-white/30 max-w-xs mt-1">{sub}</p>
       </motion.div>
     </motion.div>
   );
@@ -236,9 +236,9 @@ function SeriesCard({
         </button>
       </motion.div>
       <div className="mt-2 px-0.5">
-        <h3 className="text-sm font-semibold text-white group-hover:text-[#4f7df7] transition-colors leading-snug">{series.title}</h3>
-        <p className="text-xs text-white/40 mt-0.5">{series.instructor}</p>
-        <p className="text-xs text-white/25 mt-0.5">{series.episodes.length} episodes</p>
+        <h3 className="text-base font-semibold text-white group-hover:text-[#4f7df7] transition-colors leading-snug">{series.title}</h3>
+        <p className="text-sm text-white/40 mt-0.5">{series.instructor}</p>
+        <p className="text-sm text-white/55 mt-0.5">{series.episodes.length} episodes</p>
       </div>
     </motion.div>
   );
@@ -263,13 +263,13 @@ function EpisodeRow({
       transition={{ ...spring, delay: Math.min(index * 0.04, 0.24) }}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">{title}</p>
-        <p className="text-xs text-white/30">{duration}</p>
+        <p className="text-base font-medium text-white truncate">{title}</p>
+        <p className="text-sm text-white/30">{duration}</p>
       </div>
       <div className="flex items-center gap-3 ml-4 shrink-0">
         <button
           onClick={onPlay}
-          className="text-xs font-bold text-black px-3 py-1 rounded-lg hover:brightness-110 transition-all active:scale-95"
+          className="text-sm font-bold text-black px-3 py-1 rounded-lg hover:brightness-110 transition-all active:scale-95"
           style={{ background: "linear-gradient(135deg, #7b9df9 0%, #4f7df7 100%)" }}
         >
           Watch
@@ -345,7 +345,7 @@ function LikedVideosTab({ onSelectSeries }: { onSelectSeries: (id: string, episo
           <div key={series.id} className="space-y-2">
             <button
               onClick={() => onSelectSeries(series.id)}
-              className="text-xs font-bold uppercase tracking-widest hover:underline"
+              className="text-sm font-bold uppercase tracking-widest hover:underline"
               style={{ color: "#4f7df7" }}
             >
               {series.title}
@@ -391,7 +391,7 @@ function Favorites({ user, onLogin, onRegister, onSelectSeries }: FavoritesProps
         transition={{ ...spring, delay: 0.05 }}
       >
         <h1 className="text-3xl font-bold text-white mb-1">Favorites</h1>
-        <p className="text-white/40 text-sm">{user.name}</p>
+        <p className="text-white/40 text-base">{user.name}</p>
       </motion.div>
 
       <motion.div
@@ -404,7 +404,7 @@ function Favorites({ user, onLogin, onRegister, onSelectSeries }: FavoritesProps
           <button
             key={t}
             onClick={() => switchTab(t)}
-            className={`relative px-5 py-2 rounded-lg text-sm font-bold transition-colors ${tab === t ? "text-black" : "text-white/40 hover:text-white"}`}
+            className={`relative px-5 py-2 rounded-lg text-base font-bold transition-colors ${tab === t ? "text-black" : "text-white/40 hover:text-white"}`}
           >
             {tab === t && (
               <motion.div

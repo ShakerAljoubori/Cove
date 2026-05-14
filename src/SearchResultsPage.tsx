@@ -35,7 +35,7 @@ function SearchResultsPage({ query, onSelectSeries, onBack }: SearchResultsPageP
             <h1 className="text-xl font-bold text-white">
               Results for <span style={{ color: "#4f7df7" }}>"{query}"</span>
             </h1>
-            <p className="text-xs text-white/40 mt-0.5">{series.length} result{series.length !== 1 ? "s" : ""} found</p>
+            <p className="text-sm text-white/40 mt-0.5">{series.length} result{series.length !== 1 ? "s" : ""} found</p>
           </div>
         </div>
 
@@ -43,12 +43,12 @@ function SearchResultsPage({ query, onSelectSeries, onBack }: SearchResultsPageP
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="text-5xl mb-4 opacity-20">🔍</div>
             <p className="text-white/40 text-base">No results for "{query}"</p>
-            <p className="text-white/20 text-sm mt-1">Try a different keyword or check your spelling</p>
+            <p className="text-white/20 text-base mt-1">Try a different keyword or check your spelling</p>
           </div>
         ) : (
           <section className="mb-10">
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-bold text-white/50 uppercase tracking-wider">Series</h2>
+              <h2 className="text-base font-bold text-white/50 uppercase tracking-wider">Series</h2>
               <span
                 className="text-xs font-bold px-2 py-0.5 rounded-full"
                 style={{ color: "#e8997a", background: "rgba(232,153,122,0.1)", border: "1px solid rgba(232,153,122,0.2)" }}
@@ -79,10 +79,10 @@ function SearchResultsPage({ query, onSelectSeries, onBack }: SearchResultsPageP
                       <div className="w-full h-full bg-white/5" />
                     )}
                   </div>
-                  <div className="text-sm font-semibold text-white truncate group-hover:text-[#4f7df7] transition-colors">
+                  <div className="text-base font-semibold text-white truncate group-hover:text-[#4f7df7] transition-colors">
                     {s.title}
                   </div>
-                  <div className="text-xs text-white/40 truncate mt-0.5">{s.instructor} · {s.category}</div>
+                  <div className="text-sm text-white/40 truncate mt-0.5">{s.instructor} · {s.category}</div>
                 </button>
               ))}
             </div>

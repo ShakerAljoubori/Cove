@@ -4,13 +4,16 @@ import App from './App.tsx'
 import { AuthProvider } from './AuthContext'
 import { FavoritesProvider } from './FavoritesContext'
 import { WatchProgressProvider } from './WatchProgressContext'
+import { WatchPartyProvider } from './WatchPartyContext'
 
 createRoot(document.getElementById('root')!).render(
-  <AuthProvider>
-    <FavoritesProvider>
-      <WatchProgressProvider>
-        <App />
-      </WatchProgressProvider>
-    </FavoritesProvider>
-  </AuthProvider>,
+  <WatchPartyProvider>
+    <AuthProvider>
+      <FavoritesProvider>
+        <WatchProgressProvider>
+          <App />
+        </WatchProgressProvider>
+      </FavoritesProvider>
+    </AuthProvider>
+  </WatchPartyProvider>,
 )

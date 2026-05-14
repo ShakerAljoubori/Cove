@@ -81,7 +81,7 @@ function Row({
 
   return (
     <div className="relative group/row">
-      <h3 className="text-base font-bold text-white/70 uppercase tracking-widest mb-4 px-8">{title}</h3>
+      <h3 className="text-lg font-bold text-white/70 uppercase tracking-widest mb-4 px-8">{title}</h3>
 
       {/* Left arrow */}
       <AnimatePresence>
@@ -181,7 +181,7 @@ function Row({
                     >
                       <span className="text-black text-xs ml-0.5">▶</span>
                     </div>
-                    <span className="text-xs font-bold text-white">Play</span>
+                    <span className="text-sm font-bold text-white">Play</span>
                   </div>
                 </div>
 
@@ -210,12 +210,12 @@ function Row({
               </motion.div>
 
               <div className="mt-3 px-0.5">
-                <h4 className="text-sm font-semibold text-white group-hover:text-[#4f7df7] transition-colors leading-snug line-clamp-2">
+                <h4 className="text-base font-semibold text-white group-hover:text-[#4f7df7] transition-colors leading-snug line-clamp-2">
                   {series.title}
                 </h4>
-                <p className="text-xs text-white/40 mt-0.5 truncate">{series.instructor}</p>
+                <p className="text-sm text-white/40 mt-0.5 truncate">{series.instructor}</p>
                 {series.episodes.length > 1 && (
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(232,153,122,0.6)" }}>
+                  <p className="text-sm mt-0.5" style={{ color: "rgba(232,153,122,0.9)" }}>
                     {series.episodes.length} episodes
                   </p>
                 )}
@@ -246,13 +246,13 @@ function SeriesBrowse({ onSelectSeries, user }: SeriesBrowseProps) {
     <section className="mt-6 mb-16 space-y-10">
       {/* Filter pills */}
       <div className="flex items-center gap-3 px-8 flex-wrap">
-        <h3 className="text-lg font-bold text-white">Browse</h3>
+        <h3 className="text-xl font-bold text-white">Browse</h3>
         <div className="flex gap-2 ml-2 flex-wrap">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className="relative text-xs font-bold px-4 py-1.5 rounded-full transition-colors"
+              className="relative text-sm font-bold px-4 py-1.5 rounded-full transition-colors"
               style={{
                 color: activeCategory === cat ? "#000" : "rgba(255,255,255,0.5)",
                 border: activeCategory === cat ? "none" : "1px solid rgba(255,255,255,0.08)",

@@ -15,6 +15,8 @@ import SettingsPage from "./SettingsPage";
 import SearchResultsPage from "./SearchResultsPage";
 import { useFavorites } from "./FavoritesContext";
 import { useAuth } from "./AuthContext";
+import { useWatchParty } from "./WatchPartyContext";
+import MoodSearch from "./MoodSearch";
 import { allSeries } from "./data";
 import type { Series } from "./data";
 
@@ -41,9 +43,11 @@ function App() {
   const savedScrollRef = useRef(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const isTransitioningRef = useRef(false);
+  const openWatchPartyRef = useRef<(() => void) | null>(null);
 
   const { fetchFavorites, clearFavorites } = useFavorites();
   const { setUserId } = useAuth();
+  const { joinNavTarget, clearJoinNavTarget } = useWatchParty();
 
   useEffect(() => {
     const checkLoggedIn = async () => {
@@ -87,6 +91,13 @@ function App() {
       setCurrentPage("video");
     }
   };
+
+  // Navigate into a video after joining a watch party
+  useEffect(() => {
+    if (!joinNavTarget) return;
+    clearJoinNavTarget();
+    handleOpenVideo(joinNavTarget.seriesId, joinNavTarget.episodeId, joinNavTarget.currentTime);
+  }, [joinNavTarget]);
 
   const runPageTransition = (
     exitVars: gsap.TweenVars,
@@ -191,6 +202,7 @@ function App() {
           user={user}
           onLogout={handleLogout}
           avatar={user?.avatar}
+          onOpenWatchParty={() => openWatchPartyRef.current?.()}
         />
 
         <div className="pl-0 md:pl-20">
@@ -201,6 +213,7 @@ function App() {
               {currentPage === "home" && (
                 <div className="pt-4">
                   <Hero onPlay={handleOpenVideo} user={user} />
+                  <MoodSearch onSelectSeries={handleOpenVideo} />
                   <ContinueWatching onSelectVideo={handleOpenVideo} />
                   <SeriesBrowse onSelectSeries={handleOpenVideo} user={user} />
                 </div>
@@ -286,6 +299,7 @@ function App() {
               onBack={() => navigateTo("home")}
               initialEpisodeId={initialEpisodeId}
               initialTimestamp={initialTimestamp}
+              onRegisterPartyOpener={(fn) => { openWatchPartyRef.current = fn; }}
               onSelectSeries={(seriesId) => {
                 const next = allSeries.find((s) => s.id === seriesId);
                 if (next) {

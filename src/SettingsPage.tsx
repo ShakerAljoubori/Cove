@@ -30,12 +30,12 @@ const DANGER_CARD_STYLE = {
 };
 
 const INPUT_CLASS =
-  "bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-cyan-500/50 transition-colors w-full";
+  "bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-base text-white outline-none focus:border-cyan-500/50 transition-colors w-full";
 
 function StatusBanner({ type, msg }: { type: "success" | "error"; msg: string }) {
   return (
     <motion.div
-      className={`text-sm px-4 py-2.5 rounded-xl font-medium ${
+      className={`text-base px-4 py-2.5 rounded-xl font-medium ${
         type === "success" ? "bg-green-500/15 text-cyan-400" : "bg-red-500/15 text-red-400"
       }`}
       initial={{ opacity: 0, y: -6 }}
@@ -333,14 +333,14 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
           >
             Settings
           </h1>
-          <p className="text-xs text-white/40 mt-0.5">{user.email}</p>
+          <p className="text-sm text-white/40 mt-0.5">{user.email}</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-6">
         {/* Profile — avatar + display name */}
         <div className="rounded-2xl p-6 flex flex-col gap-4" style={CARD_STYLE}>
-          <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest">Profile</h2>
+          <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest">Profile</h2>
 
           {/* Avatar picker */}
           <div className="flex flex-col items-center gap-4">
@@ -358,7 +358,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={avatarSaving}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50 transition-all hover:scale-105 active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-base font-bold disabled:opacity-50 transition-all hover:scale-105 active:scale-95"
               style={{
                 background: "rgba(79,125,247,0.12)",
                 border: "1px solid rgba(79,125,247,0.4)",
@@ -382,7 +382,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
           </AnimatePresence>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-white/50">Display Name</label>
+            <label className="text-sm text-white/50">Display Name</label>
             <input
               type="text"
               value={name}
@@ -396,7 +396,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
           <button
             onClick={handleSaveName}
             disabled={nameSaving || !nameDirty}
-            className="self-start px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-40 transition-opacity"
+            className="self-start px-5 py-2 rounded-xl text-base font-bold disabled:opacity-40 transition-opacity"
             style={{ background: "linear-gradient(135deg, #4f7df7 0%, #3461e0 100%)", color: "#000" }}
           >
             {nameSaving ? "Saving…" : "Save Name"}
@@ -405,9 +405,9 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
 
         {/* Email */}
         <div className="rounded-2xl p-6 flex flex-col gap-4" style={CARD_STYLE}>
-          <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest">Email</h2>
+          <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest">Email</h2>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-white/50">Current Email</label>
+            <label className="text-sm text-white/50">Current Email</label>
             <input
               type="email"
               value={user.email}
@@ -416,7 +416,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-white/50">New Email</label>
+            <label className="text-sm text-white/50">New Email</label>
             <input
               type="email"
               value={newEmail}
@@ -426,7 +426,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-white/50">Current Password (to confirm)</label>
+            <label className="text-sm text-white/50">Current Password (to confirm)</label>
             <input
               type="password"
               value={emailPw}
@@ -440,7 +440,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
           <button
             onClick={handleSaveEmail}
             disabled={emailSaving || !emailDirty}
-            className="self-start px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-40 transition-opacity"
+            className="self-start px-5 py-2 rounded-xl text-base font-bold disabled:opacity-40 transition-opacity"
             style={{ background: "linear-gradient(135deg, #4f7df7 0%, #3461e0 100%)", color: "#000" }}
           >
             {emailSaving ? "Saving…" : "Save Email"}
@@ -449,14 +449,14 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
 
         {/* Security — password change */}
         <div className="rounded-2xl p-6 flex flex-col gap-4" style={CARD_STYLE}>
-          <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest">Security</h2>
+          <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest">Security</h2>
           {[
             { label: "Current Password", value: currentPw, setter: setCurrentPw },
             { label: "New Password", value: newPw, setter: setNewPw },
             { label: "Confirm New Password", value: confirmPw, setter: setConfirmPw },
           ].map(({ label, value, setter }) => (
             <div key={label} className="flex flex-col gap-1.5">
-              <label className="text-xs text-white/50">{label}</label>
+              <label className="text-sm text-white/50">{label}</label>
               <input
                 type="password"
                 value={value}
@@ -471,7 +471,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
           <button
             onClick={handleChangePassword}
             disabled={pwSaving || !currentPw || !newPw || !confirmPw}
-            className="self-start px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-40 transition-opacity"
+            className="self-start px-5 py-2 rounded-xl text-base font-bold disabled:opacity-40 transition-opacity"
             style={{ background: "linear-gradient(135deg, #4f7df7 0%, #3461e0 100%)", color: "#000" }}
           >
             {pwSaving ? "Changing…" : "Change Password"}
@@ -480,8 +480,8 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
 
         {/* Danger Zone */}
         <div className="rounded-2xl p-6 flex flex-col gap-4" style={DANGER_CARD_STYLE}>
-          <h2 className="text-xs font-bold text-red-400/60 uppercase tracking-widest">Danger Zone</h2>
-          <p className="text-xs text-white/40 leading-relaxed">
+          <h2 className="text-sm font-bold text-red-400/60 uppercase tracking-widest">Danger Zone</h2>
+          <p className="text-sm text-white/40 leading-relaxed">
             Permanently delete your account and all associated data — watch history, comments, and saved favorites. This cannot be undone.
           </p>
 
@@ -490,7 +490,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
               <motion.button
                 key="trigger"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="self-start px-5 py-2 rounded-xl text-sm font-bold transition-colors"
+                className="self-start px-5 py-2 rounded-xl text-base font-bold transition-colors"
                 style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171" }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -509,7 +509,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                 transition={{ type: "spring", stiffness: 380, damping: 26 }}
               >
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-white/50">Enter your password to confirm</label>
+                  <label className="text-sm text-white/50">Enter your password to confirm</label>
                   <input
                     type="password"
                     value={deletePw}
@@ -525,14 +525,14 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                 <div className="flex gap-3 items-center">
                   <button
                     onClick={() => { setShowDeleteConfirm(false); setDeletePw(""); setDeleteMsg(null); }}
-                    className="px-5 py-2 rounded-xl text-sm font-bold text-white/50 hover:bg-white/5 transition-colors border border-white/10"
+                    className="px-5 py-2 rounded-xl text-base font-bold text-white/50 hover:bg-white/5 transition-colors border border-white/10"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => setShowDeleteModal(true)}
                     disabled={!deletePw}
-                    className="px-5 py-2 rounded-xl text-sm font-bold disabled:opacity-40 transition-opacity"
+                    className="px-5 py-2 rounded-xl text-base font-bold disabled:opacity-40 transition-opacity"
                     style={{ background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)", color: "#fff" }}
                   >
                     Permanently Delete
@@ -585,7 +585,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                     ⚠️
                   </div>
                   <h2 className="text-lg font-black text-white">Are you sure?</h2>
-                  <p className="text-xs text-white/50 leading-relaxed">
+                  <p className="text-sm text-white/50 leading-relaxed">
                     This will permanently delete your account, watch history, progress, comments, and all saved data. There is no going back.
                   </p>
                 </div>
@@ -601,7 +601,7 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                   >
                     {deleteCountdown > 0 ? deleteCountdown : "!"}
                   </div>
-                  <p className="text-xs text-white/30">
+                  <p className="text-sm text-white/30">
                     {deleteCountdown > 0 ? `Please wait ${deleteCountdown}s before confirming` : "You may now confirm"}
                   </p>
                 </div>
@@ -610,14 +610,14 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowDeleteModal(false)}
-                    className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white/50 hover:bg-white/5 transition-colors border border-white/10"
+                    className="flex-1 px-4 py-2.5 rounded-xl text-base font-bold text-white/50 hover:bg-white/5 transition-colors border border-white/10"
                   >
                     Cancel
                   </button>
                   <button
                     disabled={deleteCountdown > 0 || deleting}
                     onClick={() => { setShowDeleteModal(false); handleDeleteAccount(); }}
-                    className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold disabled:opacity-30 transition-opacity"
+                    className="flex-1 px-4 py-2.5 rounded-xl text-base font-bold disabled:opacity-30 transition-opacity"
                     style={{ background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)", color: "#fff" }}
                   >
                     {deleting ? "Deleting…" : "Yes, delete it"}
@@ -652,8 +652,8 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="text-center">
-                  <h2 className="text-base font-black text-white">Position your photo</h2>
-                  <p className="text-xs text-white/35 mt-1">Drag to reposition · scroll or slider to zoom</p>
+                  <h2 className="text-lg font-black text-white">Position your photo</h2>
+                  <p className="text-sm text-white/35 mt-1">Drag to reposition · scroll or slider to zoom</p>
                 </div>
 
                 {/* Circular crop preview */}
@@ -715,12 +715,12 @@ export default function SettingsPage({ user, onBack, onUserUpdate, onDeleteAccou
                 <div className="flex gap-3 w-full">
                   <button
                     onClick={cancelCrop}
-                    className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white/50 hover:bg-white/5 transition-colors border border-white/10"
+                    className="flex-1 px-4 py-2.5 rounded-xl text-base font-bold text-white/50 hover:bg-white/5 transition-colors border border-white/10"
                   >Cancel</button>
                   <button
                     onClick={confirmCrop}
                     disabled={avatarSaving}
-                    className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50 transition-opacity"
+                    className="flex-1 px-4 py-2.5 rounded-xl text-base font-bold disabled:opacity-50 transition-opacity"
                     style={{ background: "linear-gradient(135deg, #4f7df7 0%, #3461e0 100%)", color: "#000" }}
                   >{avatarSaving ? "Saving…" : "Save Photo"}</button>
                 </div>

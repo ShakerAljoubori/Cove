@@ -45,7 +45,7 @@ function Hero({ onPlay, user }: HeroProps) {
           </h2>
         </div>
 
-        <p className="text-sm font-medium text-text-muted mb-6">
+        <p className="text-base font-medium text-text-muted mb-6">
           {featured.instructor} • {featured.episodes.length} Episodes • {featured.category}
         </p>
 

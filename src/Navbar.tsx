@@ -65,7 +65,7 @@ function Navbar({ onSelectSeries, onShowMore }: NavbarProps) {
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder="Search movies, series..."
-            className="bg-white/5 border border-white/10 rounded-full py-1.5 pl-10 pr-4 text-sm text-text-main placeholder:text-text-muted/40 focus:outline-none focus:ring-1 focus:ring-brand-primary/30 focus:bg-white/10 transition-all duration-300 ease-in-out w-40 focus:w-[min(320px,calc(100vw-2rem))]"
+            className="bg-white/5 border border-white/10 rounded-full py-1.5 pl-10 pr-4 text-base text-text-main placeholder:text-text-muted/40 focus:outline-none focus:ring-1 focus:ring-brand-primary/30 focus:bg-white/10 transition-all duration-300 ease-in-out w-40 focus:w-[min(320px,calc(100vw-2rem))]"
           />
 
           {isOpen && (
@@ -82,14 +82,14 @@ function Navbar({ onSelectSeries, onShowMore }: NavbarProps) {
                         ? <img src={s.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
                         : <div className="w-10 h-10 rounded-lg bg-white/10 shrink-0" />}
                       <div className="min-w-0">
-                        <div className="text-sm text-white truncate">{s.title}</div>
-                        <div className="text-xs text-white/40">{s.instructor} · {s.category}</div>
+                        <div className="text-base text-white truncate">{s.title}</div>
+                        <div className="text-sm text-white/40">{s.instructor} · {s.category}</div>
                       </div>
                     </button>
                   ))}
                   <button
                     onMouseDown={() => { onShowMore(query); clearSearch(); }}
-                    className="w-full px-4 py-3 text-sm font-medium transition-colors border-t border-white/5 text-center"
+                    className="w-full px-4 py-3 text-base font-medium transition-colors border-t border-white/5 text-center"
                     style={{ color: "#4f7df7" }}
                     onMouseEnter={e => (e.currentTarget.style.background = "rgba(79,125,247,0.06)")}
                     onMouseLeave={e => (e.currentTarget.style.background = "")}
@@ -98,7 +98,7 @@ function Navbar({ onSelectSeries, onShowMore }: NavbarProps) {
                   </button>
                 </>
               ) : (
-                <div className="px-4 py-6 text-center text-sm text-white/30">
+                <div className="px-4 py-6 text-center text-base text-white/30">
                   No results for "{query}"
                 </div>
               )}
